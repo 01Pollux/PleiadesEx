@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="DefaultRules" ToolsVersion="17.0">
+  <Include Path="allrules.ruleset" Action="Default" />
+  <Include Path="cppcorecheckclassrules.ruleset" Action="Default" />
+  <Include Path="cppcorecheckconstrules.ruleset" Action="Default" />
+  <Include Path="cppcorecheckenumrules.ruleset" Action="Default" />
+  <Include Path="cppcorecheckfuncrules.ruleset" Action="Default" />
+  <Include Path="mixedminimumrules.ruleset" Action="Default" />
+  <Include Path="mixedrecommendedrules.ruleset" Action="Default" />
+  <Include Path="nativeminimumrules.ruleset" Action="Default" />
+  <Include Path="nativerecommendedrules.ruleset" Action="Default" />
+</RuleSet>
