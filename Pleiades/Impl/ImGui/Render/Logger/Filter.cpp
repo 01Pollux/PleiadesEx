@@ -47,7 +47,7 @@ bool ImGuiPlLogSection::FilterPlugin(iterator_type iter) const
     return Filter.CountGrep == 0;
 }
 
-bool ImGuiJsLogInfo::FilterInfo(const ImGuiTextFilter& filter, Json::const_iterator iter, bool is_type) const
+bool ImGuiJsLogInfo::FilterInfo(const ImGuiTextFilter& filter, nlohmann::json::const_iterator iter, bool is_type) const
 {
     if (filter.Filters.empty())
         return true;

@@ -1,14 +1,14 @@
 #pragma once
 
 #include <nlohmann/Json.hpp>
-#include "SGDefines.hpp"
+#include <shadowgarden/defines.hpp>
 
 SG_NAMESPACE_BEGIN;
 
 struct ImGuiTheme
 {
 	std::string Name;
-	Json Info;
+	nlohmann::json Info;
 };
 
 class ImGuiThemesManager

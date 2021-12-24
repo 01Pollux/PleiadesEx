@@ -1,7 +1,7 @@
 #pragma once
 
 #include <boost/system.hpp>
-#include "SGDefines.hpp"
+#include <shadowgarden/defines.hpp>
 
 #if BOOST_WINDOWS
 #define WIN32_MEAN_AND_LEAN

@@ -2,9 +2,11 @@
 
 #include <map>
 #include <functional>
-#include "Interfaces/ImGui.hpp"
-#include "Interfaces/InterfacesSys.hpp"
-#include "User/FontAwesome_Icons.hpp"
+
+#include <shadowgarden/interfaces/ImGui.hpp>
+#include <shadowgarden/interfaces/InterfacesSys.hpp>
+#include <shadowgarden/users/FontAwesome_Icons.hpp>
+
 #include "Themes/Themes.hpp"
 
 SG_NAMESPACE_BEGIN;
@@ -50,6 +52,9 @@ public:
 	// About
 	void RenderAbout();
 
+public:
+	void LoadTabs(uint32_t serialized_tabs);
+	void SaveTabs(nlohmann::json& out_config);
 
 	struct PropManager_t
 	{ 
@@ -67,9 +72,15 @@ public:
 
 	struct MainTabsInfo_t
 	{
+		using callback_t = void (ImGui_BrdigeRenderer::*)();
+
 		const char* const Name;
-		bool isOpen{ true };
-		MainTabsInfo_t(const char* name) noexcept : Name(name) { }
+		const callback_t Callback;
+
+		bool IsOpen{ true };
+		bool IsFocused{ false };
+
+		MainTabsInfo_t(const char* name, callback_t callback) noexcept : Name(name), Callback(callback) { }
 
 		enum class Type
 		{
@@ -81,10 +92,10 @@ public:
 	};
 
 	MainTabsInfo_t MainTabsInfo[4]{
-		ICON_FA_ARCHIVE		" Props Manager",
-		ICON_FA_CLIPBOARD	" Plugins Manager",
-		ICON_FA_BOOKMARK	" Logger", 
-		ICON_FA_STOPWATCH	" Profiler"
+		{ ICON_FA_STOPWATCH	" Profiler",		&ImGui_BrdigeRenderer::RenderProfiler },
+		{ ICON_FA_BOOKMARK	" Logger",			&ImGui_BrdigeRenderer::RenderLogger }, 
+		{ ICON_FA_ARCHIVE	" Props Manager",	&ImGui_BrdigeRenderer::RenderPropManager },
+		{ ICON_FA_CLIPBOARD	" Plugins Manager",	&ImGui_BrdigeRenderer::RenderPluginManager },
 	};
 
 	MainTabsInfo_t& GetTab(MainTabsInfo_t::Type type) noexcept

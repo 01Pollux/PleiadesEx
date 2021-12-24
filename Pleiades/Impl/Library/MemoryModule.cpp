@@ -1,16 +1,16 @@
 #include <fstream>
 #include <iostream>
 
-#include "LibrarySys.hpp"
-#include "User/Modules.hpp"
-#include "User/String.hpp"
+#include <shadowgarden/users/Modules.hpp>
+#include <shadowgarden/users/String.hpp>
 
+#include "LibrarySys.hpp"
 #include "Impl/Plugins/PluginManager.hpp"
 
 SG_NAMESPACE_BEGIN;
 
 LibraryManager::LibraryManager() noexcept :
-	m_Runtime(std::make_unique<JIT::JitRuntime>())
+	m_Runtime(std::make_unique<asmjit::JitRuntime>())
 { }
 
 ILibrary* LibraryManager::ReadLibrary(const char* module_name)

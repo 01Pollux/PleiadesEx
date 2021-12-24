@@ -1,4 +1,4 @@
-#include <nlohmann/Json.hpp>
+#include <nlohmann/json.hpp>
 
 #include "HookInstance.hpp"
 #include "SigBuilder.hpp"
@@ -9,7 +9,7 @@
 
 SG_NAMESPACE_BEGIN;
 
-HookInstance::HookInstance(IntPtr original_function, const Json& data, std::string& out_err) :
+HookInstance::HookInstance(IntPtr original_function, const nlohmann::json& data, std::string& out_err) :
 	m_AddressInMemory(original_function)
 {
 	DetourDetail::SigBuilder sig(data, out_err);
@@ -45,7 +45,7 @@ HookInstance::~HookInstance() noexcept
 
 void* HookInstance::AllocCallbackHandler(DetourDetail::SigBuilder& sigbuilder, std::string& out_err)
 {
-	using namespace JIT;
+	using namespace asmjit;
 
 	CodeHolder code;
 	code.init(SG::lib_manager.GetRuntime()->environment());
@@ -216,9 +216,9 @@ bool HookInstance::RunHandler(bool is_post)
 }
 
 
-void HookInstance::InvokeCallbacks(DataInfo info, bool post, const JIT::x86::Gp& ret)
+void HookInstance::InvokeCallbacks(DataInfo info, bool post, const asmjit::x86::Gp& ret)
 {
-	using namespace JIT;
+	using namespace asmjit;
 	const auto handler_fn = &HookInstance::RunHandler;
 
 	// we don't want to reload args two times, we will just do once it in pre hooks
@@ -226,7 +226,7 @@ void HookInstance::InvokeCallbacks(DataInfo info, bool post, const JIT::x86::Gp&
 		m_CallContext->ManageArgs(info.typeInfo, info.Compiler, true);
 
 	InvokeNode* pFunc;
-	info.Compiler.invoke(&pFunc, std::bit_cast<void*>(handler_fn), FuncSignatureT<bool, HookInstance*, bool>(CallConv::kIdThisCall));
+	info.Compiler.invoke(&pFunc, std::bit_cast<void*>(handler_fn), FuncSignatureT<bool, HookInstance*, bool>(CallConvId::kThisCall));
 
 	pFunc->setArg(0, this);
 	pFunc->setArg(1, post);
@@ -239,7 +239,7 @@ void HookInstance::InvokeCallbacks(DataInfo info, bool post, const JIT::x86::Gp&
 
 void HookInstance::InvokeOriginal(DataInfo info)
 {
-	using namespace JIT;
+	using namespace asmjit;
 
 	InvokeNode* pFunc;
 	info.Compiler.invoke(&pFunc, x86::Mem(uint64_t(this) + offsetof(HookInstance, m_ActualFunction)), m_CallContext->m_FuncSig);
@@ -281,7 +281,7 @@ void HookInstance::InvokeOriginal(DataInfo info)
 
 void HookInstance::ReadReturn(DataInfo info)
 {
-	using namespace JIT;
+	using namespace asmjit;
 
 	if (info.typeInfo.has_ret_mem())
 	{
@@ -299,7 +299,7 @@ void HookInstance::ReadReturn(DataInfo info)
 
 void HookInstance::WriteReturn(DataInfo info)
 {
-	using namespace JIT;
+	using namespace asmjit;
 
 	if (info.typeInfo.has_ret_mem())
 	{

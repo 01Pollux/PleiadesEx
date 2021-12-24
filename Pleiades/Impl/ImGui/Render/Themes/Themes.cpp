@@ -22,7 +22,7 @@ void ImGuiThemesManager::ReloadThemes()
 			std::string name = dir.path().stem().string();
 
 			std::ifstream file(dir.path());
-			Json cfg = Json::parse(file, nullptr, false, true);
+			auto cfg{ nlohmann::json::parse(file, nullptr, false, true) };
 
 			if (!cfg.is_discarded())
 				this->m_LoadedThemes.emplace_back(dir.path().stem().string(), std::move(cfg));

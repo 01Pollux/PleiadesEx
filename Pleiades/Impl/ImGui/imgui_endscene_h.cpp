@@ -1,5 +1,5 @@
 
-#include <Interfaces/GameData.hpp>
+#include <shadowgarden/interfaces/GameData.hpp>
 
 #include "Impl/Library/LibrarySys.hpp"
 #include "Impl/DetoursMan/HooksManager.hpp"
@@ -14,7 +14,7 @@ SG_NAMESPACE_BEGIN;
 
 ImGuiInterface imgui_iface;
 
-bool ImGuiInterface::InitializeWindow(const std::string& default_theme)
+bool ImGuiInterface::InitializeWindow(const nlohmann::json& config)
 {
 	m_CurWindow = FindWindowA(m_ProcWindowName->c_str(), nullptr);
 	if (!m_CurWindow)
@@ -62,7 +62,13 @@ bool ImGuiInterface::InitializeWindow(const std::string& default_theme)
 		);
 	}
 
-	this->m_Renderer.ThemeManager.LoadTheme(default_theme);
+	{
+		auto iter = config.find("theme");
+		this->m_Renderer.ThemeManager.LoadTheme((iter == config.end() || !iter->is_string()) ? "" : *iter);
+	}
+	if (auto iter = config.find("tabs"); iter != config.end() && iter->is_number_integer())
+		this->m_Renderer.LoadTabs(iter->get<uint32_t>());
+
 	return true;
 }
 

@@ -89,14 +89,14 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NOMINMAX;ASMJIT_STATIC;_WINDOWS;_USRDLL;WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;_WINDOWS;_USRDLL;WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <EnableModules>false</EnableModules>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)Libraries\;$(SolutionDir)Externals\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SG_LIBRARIES)Includes\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalBMIDirectories>
       </AdditionalBMIDirectories>
@@ -113,7 +113,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalLibraryDirectories>$(SolutionDir)Libraries\asmjit\lib;$(SolutionDir)Libraries\imgui\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SG_LIBRARIES)Binaries\asmjit\$(PlatformTarget)\$(Configuration)\;$(SG_LIBRARIES)Binaries\imgui\$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>asmjit.lib;imgui.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -123,7 +123,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NOMINMAX;ASMJIT_STATIC;_WINDOWS;_USRDLL;WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;_WINDOWS;_USRDLL;WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -131,7 +131,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
       <EnableModules>false</EnableModules>
       <LanguageStandard_C>Default</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)Libraries\;$(SolutionDir)Externals\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SG_LIBRARIES)Includes\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalBMIDirectories>
       </AdditionalBMIDirectories>
       <AdditionalHeaderUnitDependencies>
@@ -150,7 +150,7 @@
       <EnableUAC>false</EnableUAC>
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalDependencies>asmjit.lib;imgui.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)Libraries\asmjit\lib;$(SolutionDir)Libraries\imgui\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SG_LIBRARIES)Binaries\asmjit\$(PlatformTarget)\$(Configuration)\;$(SG_LIBRARIES)Binaries\imgui\$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <Profile>true</Profile>
       <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
@@ -159,14 +159,14 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NOMINMAX;ASMJIT_STATIC;_WINDOWS;_USRDLL;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;_WINDOWS;_USRDLL;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <EnableModules>false</EnableModules>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)Libraries\;$(SolutionDir)Externals\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SG_LIBRARIES)Includes\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalBMIDirectories>
       </AdditionalBMIDirectories>
@@ -183,7 +183,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <AdditionalDependencies>asmjit.lib;imgui.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)Libraries\asmjit\lib;$(SolutionDir)Libraries\imgui\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SG_LIBRARIES)Binaries\asmjit\$(PlatformTarget)\$(Configuration)\;$(SG_LIBRARIES)Binaries\imgui\$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -192,7 +192,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NOMINMAX;ASMJIT_STATIC;_WINDOWS;_USRDLL;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;_WINDOWS;_USRDLL;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -200,7 +200,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
       <EnableModules>false</EnableModules>
       <LanguageStandard_C>Default</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)Libraries\;$(SolutionDir)Externals\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SG_LIBRARIES)Includes\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalBMIDirectories>
       </AdditionalBMIDirectories>
       <AdditionalHeaderUnitDependencies>
@@ -218,7 +218,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <AdditionalDependencies>asmjit.lib;imgui.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)Libraries\asmjit\lib;$(SolutionDir)Libraries\imgui\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SG_LIBRARIES)Binaries\asmjit\$(PlatformTarget)\$(Configuration)\;$(SG_LIBRARIES)Binaries\imgui\$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

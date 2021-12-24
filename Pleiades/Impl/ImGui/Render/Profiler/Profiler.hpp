@@ -1,6 +1,6 @@
 #pragma once
 
-#include "User/Profiler.hpp"
+#include <shadowgarden/users/Profiler.hpp>
 #include "../../Render/render.hpp"
 
 SG_NAMESPACE_BEGIN;

@@ -2,7 +2,7 @@
 
 #include <unordered_map>
 #include <nlohmann/Json.hpp>
-#include "SGDefines.hpp"
+#include <shadowgarden/defines.hpp>
 
 
 SG_NAMESPACE_BEGIN;
@@ -23,28 +23,28 @@ namespace DetourDetail
 			custom_table().contains(type_name);
 		}
 
-		uint32_t get_detault(const std::string& type_name) const
+		asmjit::TypeId get_detault(const std::string& type_name) const
 		{
-			return m_TypeInfos["Defaults"][type_name].get<uint32_t>();
+			return default_table()[type_name].get<asmjit::TypeId>();
 		}
 
-		const Json& custom_table() const noexcept { return m_TypeInfos["Custom"]; }
-		const Json& default_table() const noexcept { return m_TypeInfos["Defaults"]; }
+		const nlohmann::json& custom_table() const noexcept { return m_TypeInfos["Custom"]; }
+		const nlohmann::json& default_table() const noexcept { return m_TypeInfos["Defaults"]; }
 
 		/// <summary>
 		/// collect the size of types
 		/// </summary>
-		size_t get_size(const std::vector<uint32_t>&) const noexcept;
+		size_t get_size(const std::vector<asmjit::TypeId>&) const noexcept;
 
 		/// <summary>
 		/// load type's underlying types into a vector
 		/// </summary>
 		/// <param name="type_name"></param>
 		/// <returns></returns>
-		std::vector<uint32_t> load_type(const Json& type_name) const;
+		std::vector<asmjit::TypeId> load_type(const nlohmann::json& type_name) const;
 
 	private:
-		Json m_TypeInfos;
+		nlohmann::json m_TypeInfos;
 	};
 }
 

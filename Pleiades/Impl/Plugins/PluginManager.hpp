@@ -16,7 +16,9 @@ class DLLManager : public IPluginManager
 public:
 	bool BasicInit();
 
-	void LoadAllDLLs(const Json& plugins);
+	void BasicShutdown();
+
+	void LoadAllDLLs(const nlohmann::json& plugins);
 
 	void UnloadAllDLLs();
 

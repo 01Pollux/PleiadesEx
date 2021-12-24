@@ -6,7 +6,7 @@
 
 SG_NAMESPACE_BEGIN;
 
-bool ImGuiInterface::LoadImGui(const Json& cfg)
+bool ImGuiInterface::LoadImGui(const nlohmann::json& cfg)
 {
 	auto windows = cfg.find("windows");
 	if (windows == cfg.end())
@@ -23,8 +23,7 @@ bool ImGuiInterface::LoadImGui(const Json& cfg)
 	m_ImGuiContext = ImGui::CreateContext();
 	ImGui::SetCurrentContext(m_ImGuiContext);
 
-	auto iter = cfg.find("theme");
-	if (!this->InitializeWindow((iter == cfg.end() || !iter->is_string()) ? "" : *iter))
+	if (!this->InitializeWindow(cfg))
 	{
 		this->ShutdownWindow(false);
 		return false;
@@ -35,10 +34,11 @@ bool ImGuiInterface::LoadImGui(const Json& cfg)
 	return true;
 }
 
-void ImGuiInterface::SaveImGui(Json& cfg)
+void ImGuiInterface::SaveImGui(nlohmann::json& cfg)
 {
 	if (auto theme = m_Renderer.ThemeManager.CurrentTheme; theme)
 		cfg["theme"] = *theme;
+	m_Renderer.SaveTabs(cfg["tabs"]);
 }
 
 SG_NAMESPACE_END;

@@ -11,7 +11,7 @@ namespace ShadowGarden::DetourDetail
 	{
 		std::ifstream file(std::string(LibraryManager::CommonTag) + ".JitTypes.json");
 		if (file)
-			m_TypeInfos = Json::parse(file, nullptr, true, true);
+			m_TypeInfos = nlohmann::json::parse(file, nullptr, true, true);
 
 		if (m_TypeInfos.is_null())
 		{
@@ -21,15 +21,13 @@ namespace ShadowGarden::DetourDetail
 		}
 	}
 
-	size_t TypeTable::get_size(const std::vector<uint32_t>& types) const noexcept
+	size_t TypeTable::get_size(const std::vector<asmjit::TypeId>& types) const noexcept
 	{
-		using namespace JIT::Type;
+		using namespace asmjit::TypeUtils;
 
 		size_t size = 0;
 		for (auto type : types)
-		{
 			size += sizeOf(deabstract(type, deabstractDeltaOfSize(sizeof(void*))));
-		}
 		return size;
 	}
 
@@ -111,22 +109,22 @@ namespace ShadowGarden::DetourDetail
 	///	}
 	///
 	/// </summary>
-	std::vector<uint32_t> TypeTable::load_type(const Json& type_name) const
+	std::vector<asmjit::TypeId> TypeTable::load_type(const nlohmann::json& type_name) const
 	{
 		if (type_name.is_null())
 			return { };
 
-		const Json& default_types = default_table();
+		const nlohmann::json& default_types = default_table();
 		const bool type_is_string = type_name.is_string();
 
 		if (type_is_string)
 		{
 			if (const auto iter = default_types.find(type_name); iter != default_types.end())
-				return { static_cast<uint32_t>(*iter) };
+				return { static_cast<asmjit::TypeId>(*iter) };
 		}
 
-		const Json& custom_types = custom_table();
-		const Json* custom_type = nullptr;
+		const nlohmann::json& custom_types = custom_table();
+		const nlohmann::json* custom_type = nullptr;
 		if (!type_is_string)
 		{
 			custom_type = &type_name;
@@ -140,7 +138,7 @@ namespace ShadowGarden::DetourDetail
 
 		if (custom_type)
 		{
-			std::vector<uint32_t> types;
+			std::vector<asmjit::TypeId> types;
 			for (const auto& arg : *custom_type)
 			{
 				const bool is_object = arg.is_object();
@@ -148,7 +146,7 @@ namespace ShadowGarden::DetourDetail
 					continue;
 
 				using string_type = const std::string&;
-				const Json& name_or_arr = is_object ? arg["type"] : arg;
+				const nlohmann::json& name_or_arr = is_object ? arg["type"] : arg;
 
 				if (name_or_arr.is_array())
 				{
@@ -188,7 +186,7 @@ namespace ShadowGarden::DetourDetail
 						// instead of copy pasting N elements, "repeat" does it for us
 						size_t size_of_array = is_object && arg.contains("repeat") ? arg["repeat"].get<size_t>() : 1;
 						for (; size_of_array > 0; size_of_array--)
-							types.push_back(static_cast<uint32_t>(*iter));
+							types.push_back(static_cast<asmjit::TypeId>(iter->get<int>()));
 					}
 					// else if it's a custom type
 					else if (custom_types.contains(name_or_arr))

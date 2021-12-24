@@ -1,13 +1,13 @@
-#include "Logger.hpp"
 #include <format>
+#include "Logger.hpp"
 
 SG_NAMESPACE_BEGIN;
 
-void ImGuiJsLog_HandleDrawPopups(Json& info);
+void ImGuiJsLog_HandleDrawPopups(nlohmann::json& info);
 
-void ImGuiJsLog_HandleDrawInfo(const Json& info);
-void ImGuiJsLog_HandleDrawArray(const Json& infoarray);
-void ImGuiJsLog_HandleDrawData(const char* key, const Json& value);
+void ImGuiJsLog_HandleDrawInfo(const nlohmann::json& info);
+void ImGuiJsLog_HandleDrawArray(const nlohmann::json& infoarray);
+void ImGuiJsLog_HandleDrawData(const char* key, const nlohmann::json& value);
 
 static std::string ImGuiJsViewPopup;
 
@@ -127,9 +127,9 @@ void ImGuiJsLogInfo::DrawLogs(const ImGuiTextFilter& filter)
 
 
 
-void ImGuiJsLog_HandleDrawInfo(const Json& info)
+void ImGuiJsLog_HandleDrawInfo(const nlohmann::json& info)
 {
-	using value_t = Json::value_t;
+	using value_t = nlohmann::json::value_t;
 
 	for (auto iter = info.cbegin(); iter != info.cend(); iter++)
 	{
@@ -172,9 +172,9 @@ void ImGuiJsLog_HandleDrawInfo(const Json& info)
 }
 
 
-void ImGuiJsLog_HandleDrawArray(const Json& info)
+void ImGuiJsLog_HandleDrawArray(const nlohmann::json& info)
 {
-	using value_t = Json::value_t;
+	using value_t = nlohmann::json::value_t;
 
 	char key[8];
 	for (size_t arr_pos = 0; const auto& val : info)
@@ -219,9 +219,9 @@ void ImGuiJsLog_HandleDrawArray(const Json& info)
 	}
 }
 
-void ImGuiJsLog_HandleDrawData(const char* key, const Json& value)
+void ImGuiJsLog_HandleDrawData(const char* key, const nlohmann::json& value)
 {
-	using value_t = Json::value_t;
+	using value_t = nlohmann::json::value_t;
 
 	if (ImGui::TreeNodeEx(&value, ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanFullWidth, "%s: ", key))
 	{
@@ -276,7 +276,7 @@ void ImGuiJsLog_HandleDrawData(const char* key, const Json& value)
 
 
 
-void ImGuiJsLog_HandleDrawPopups(Json& info)
+void ImGuiJsLog_HandleDrawPopups(nlohmann::json& info)
 {
 	if (ImGui::Selectable("Copy"))
 	{
@@ -288,11 +288,9 @@ void ImGuiJsLog_HandleDrawPopups(Json& info)
 
 	if (ImGui::Selectable("Paste"))
 	{
-		Json pasted = Json::parse(ImGui::GetClipboardText(), nullptr, false, true);
+		auto pasted{ nlohmann::json::parse(ImGui::GetClipboardText(), nullptr, false, true) };
 		if (!pasted.is_discarded())
-		{
 			info.merge_patch(pasted);
-		}
 		ImGui::CloseCurrentPopup();
 	}
 

@@ -1,8 +1,9 @@
 #include <fstream>
 #include <chrono>
 
-#include <User/Modules.hpp>
-#include <User/String.hpp>
+#include <shadowgarden/Users/Modules.hpp>
+#include <shadowgarden/Users/String.hpp>
+#include <shadowgarden/Users/Types.hpp>
 
 #include "PluginManager.hpp"
 #include "Impl/Library/LibrarySys.hpp"
@@ -13,7 +14,7 @@ SG_NAMESPACE_BEGIN;
 
 DLLManager plugin_manager;
 
-void DLLManager::LoadAllDLLs(const Json& plugins)
+void DLLManager::LoadAllDLLs(const nlohmann::json& plugins)
 {
 	namespace fs = std::filesystem;
 
@@ -151,9 +152,9 @@ void DLLManager::LoadOneDLL(const std::string& proc_name, std::filesystem::path&
 std::string DLLManager::GetProcessName()
 {
 #if BOOST_WINDOWS
-	char proc_path[MAX_PATH]{ };
-	DWORD size = std::ssize(proc_path);
-	QueryFullProcessImageNameA(GetCurrentProcess(), NULL, proc_path, &size);
+	TChar proc_path[MAX_PATH]{ };
+	DWord size = std::ssize(proc_path) - 1;
+	QueryFullProcessImageName(GetCurrentProcess(), NULL, proc_path, &size);
 
 	std::string procName(proc_path, size);
 	return procName.substr(procName.find_last_of("\\") + 1);

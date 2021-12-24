@@ -3,7 +3,7 @@
 #include <regex>
 
 #include <nlohmann/Json.hpp>
-#include <User/String.hpp>
+#include <shadowgarden/users/String.hpp>
 
 #include "Impl/Library/LibrarySys.hpp"
 #include "Profiler.hpp"
@@ -123,10 +123,10 @@ void ImGuiProfilerInstance::SectionHandler::Export(const std::string& file_name)
     if (!SG::lib_manager.GoToDirectory(PlDirType::Profiler, nullptr, path, std::ssize(path)))
         return;
 
-    Json data;
+    nlohmann::json data;
     for (auto& section : this->m_Sections)
     {
-        Json& cur_sec = data[section.name];
+        auto& cur_sec = data[section.name];
         for (auto& name_dur : {
             name_and_duration{ "min", section.min },
             name_and_duration{ "max", section.max },
@@ -137,7 +137,7 @@ void ImGuiProfilerInstance::SectionHandler::Export(const std::string& file_name)
             cur_sec[name_dur.first] = std::format("{}ns ({}us) ({}ms)", name_dur.second / 1ns, name_dur.second / 1us, name_dur.second / 1ms);
         }
 
-        Json& entries = cur_sec["Entries"];
+        auto& entries = cur_sec["Entries"];
         size_t stacktrace_index = 0;
 
         for (auto& entry : section.entries)
@@ -150,7 +150,7 @@ void ImGuiProfilerInstance::SectionHandler::Export(const std::string& file_name)
                 std::string stacktrace = boost::stacktrace::to_string(*entry.stack_info);
                 std::regex token{ "\\n+" };
                 std::sregex_token_iterator iter{ stacktrace.cbegin(), stacktrace.end(), token, -1 }, end;
-                Json& trace = entries["stack trace"][stacktrace_index++];
+                auto& trace = entries["stack trace"][stacktrace_index++];
 
                 for (; iter != end; iter++)
                     trace.emplace_back(iter->str());

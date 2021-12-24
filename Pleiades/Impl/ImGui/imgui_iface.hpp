@@ -2,10 +2,10 @@
 
 #include <boost/system.hpp>
 
-#include <User/IntPtr.hpp>
-#include <Interfaces/InterfacesSys.hpp>
-#include <Interfaces/HooksManager.hpp>
-#include <Interfaces/ImGui.hpp>
+#include <shadowgarden/users/IntPtr.hpp>
+#include <shadowgarden/interfaces/InterfacesSys.hpp>
+#include <shadowgarden/interfaces/HooksManager.hpp>
+#include <shadowgarden/interfaces/ImGui.hpp>
 
 #include "Render/render.hpp"
 
@@ -13,8 +13,8 @@
 
 #define WIN32_MEAN_AND_LEAN
 #include <Windows.h>
-#include <imgui/backends/imgui_impl_dx9.h>
-#include <imgui/backends/imgui_impl_win32.h>
+#include <imgui/imgui_impl_dx9.h>
+#include <imgui/imgui_impl_win32.h>
 
 #elif BOOST_LINUX
 
@@ -27,9 +27,9 @@ SG_NAMESPACE_BEGIN;
 class ImGuiInterface final : public SG::IImGuiLoader
 {
 public:
-	bool LoadImGui(const Json& cfg);
+	bool LoadImGui(const nlohmann::json& cfg);
 
-	void SaveImGui(Json& info);
+	void SaveImGui(nlohmann::json& info);
 
 #if BOOST_WINDOWS
 	static LRESULT WINAPI WinProcCallback(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -63,7 +63,7 @@ private:
 	/// 
 	/// After the function return, if 'm_ProcWindowName' is empty, then the initalization failed
 	/// </summary>
-	bool InitializeWindow(const std::string& default_theme);
+	bool InitializeWindow(const nlohmann::json& config);
 
 	/// <summary>
 	/// Uninitialize Window and ImGui (Dx9 hooks for windows)

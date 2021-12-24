@@ -2,11 +2,11 @@
 #include <fstream>
 #include <mutex>
 
-#include "Logger.hpp"
-#include "User/String.hpp"
-#include "User/StopWatch.hpp"
+#include <shadowgarden/interfaces/PluginSys.hpp>
+#include <shadowgarden/users/String.hpp>
+#include <shadowgarden/users/StopWatch.hpp>
 
-#include "Interfaces/PluginSys.hpp"
+#include "Logger.hpp"
 #include "Impl/Library/LibrarySys.hpp"
 
 
@@ -33,7 +33,7 @@ struct LoggerImpl::InternalLoggerInfo
 	std::string		TimeStamp;
 	SG::PlLogType	LogType;
 	LogSourceLoc	SourceLoc;
-	Json			Info;
+	nlohmann::json	Info;
 
 	InternalLoggerInfo(SG::LoggerInfo&& info) noexcept;
 };
@@ -47,18 +47,18 @@ LoggerImpl::InternalLoggerInfo::InternalLoggerInfo(SG::LoggerInfo&& linfo) noexc
 	TimeStamp(FormatTime("{:%F %H:%M:%S}"sv)),
 	LogType(linfo.LogType),
 	SourceLoc(linfo.SourceLoc),
-	Info(std::forward<OrderedJson>(linfo.Info))
+	Info(std::forward<nlohmann::ordered_json>(linfo.Info))
 { }
 
 void LoggerImpl::LogMessage(LoggerInfo&& linfo)
 {
-	std::lock_guard guard(_LogMutex);
+	std::lock_guard guard(m_LogMutex);
 	m_PendingLogs.emplace_front(std::forward<LoggerInfo>(linfo));
 }
 
 void LoggerImpl::StartLogs()
 {
-	_LogTimer = std::jthread(
+	m_LogTimer = std::jthread(
 		[] (std::stop_token tok, LoggerImpl* pLogger)
 	{
 		std::stop_callback callback(
@@ -82,12 +82,12 @@ void LoggerImpl::StartLogs()
 
 void LoggerImpl::WriteLogs()
 {
-	std::lock_guard guard(_LogMutex);
+	std::lock_guard guard(m_LogMutex);
 
 	if (m_PendingLogs.empty())
 		return;
 
-	std::map<std::string, OrderedJson> final_info;
+	std::map<std::string, nlohmann::ordered_json> final_info;
 
 	for (auto& linfo : m_PendingLogs)
 	{
@@ -108,7 +108,7 @@ void LoggerImpl::WriteLogs()
 			break;
 		}
 
-		OrderedJson res
+		nlohmann::ordered_json res
 		{
 			{
 				stype,
@@ -142,7 +142,7 @@ void LoggerImpl::WriteLogs()
 			if (in_file && in_file.tellg() > 0)
 			{
 				in_file.seekg(0, in_file.beg);
-				data.merge_patch(OrderedJson::parse(in_file, nullptr, true, true));
+				data.merge_patch(nlohmann::ordered_json::parse(in_file, nullptr, true, true));
 			}
 		}
 
@@ -158,9 +158,9 @@ void LoggerImpl::WriteLogs()
 
 void LoggerImpl::EndLogs()
 {
-	_LogTimer.request_stop();
+	m_LogTimer.request_stop();
 	// TODO: fix std::system_error no such process when detaching and attaching dll very fast
-	if (_LogTimer.joinable())	_LogTimer.join();
+	if (m_LogTimer.joinable())	m_LogTimer.join();
 }
 
 SG_NAMESPACE_END;

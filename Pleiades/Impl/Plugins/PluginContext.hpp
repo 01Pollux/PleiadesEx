@@ -3,11 +3,11 @@
 #include <filesystem>
 
 #include <nlohmann/Json.hpp>
-#include "Interfaces/PluginSys.hpp"
-#include "Interfaces/LibrarySys.hpp"
+#include <shadowgarden/interfaces/PluginSys.hpp>
+#include <shadowgarden/Interfaces/LibrarySys.hpp>
 
-#include "User/Version.hpp"
-#include "User/IntPtr.hpp"
+#include <shadowgarden/users/Version.hpp>
+#include <shadowgarden/users/IntPtr.hpp>
 
 
 SG_NAMESPACE_BEGIN;
@@ -83,7 +83,7 @@ private:
 	/// </summary>
 	std::filesystem::path GetConfigPath();
 
-	Json OpenConfig();
+	nlohmann::json OpenConfig();
 
 	IPlugin*					m_Plugin{ };
 	std::unique_ptr<ILibrary>	m_PluginModule;

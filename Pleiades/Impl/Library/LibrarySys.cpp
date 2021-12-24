@@ -14,9 +14,10 @@
 #include <dlfcn.h>
 #endif
 
+#include <shadowgarden/users/Profiler.hpp>
+
 #include "LibrarySys.hpp"
 #include "GameData.hpp"
-#include "User/Profiler.hpp"
 
 
 SG_NAMESPACE_BEGIN;
@@ -287,7 +288,7 @@ std::string LibraryManager::GetLastError()
 	LPVOID_ pStr;
 
 	size_t size = format_message(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER_ | FORMAT_MESSAGE_FROM_STRING_ | FORMAT_MESSAGE_IGNORE_INSERTS_,
+		FORMAT_MESSAGE_ALLOCATE_BUFFER_ | FORMAT_MESSAGE_FROM_SYSTEM_ | FORMAT_MESSAGE_IGNORE_INSERTS_,
 		NULL,
 		err,
 		MAKELANGID_(LANG_NEUTRAL_, SUBLANG_DEFAULT_),
@@ -295,12 +296,13 @@ std::string LibraryManager::GetLastError()
 		NULL,
 		nullptr
 	);
-
-	std::string msg{ std::bit_cast<const char*>(pStr), size };
-
-	LocalFree(pStr);
-
-	return size ? msg : std::format("Error Code: {:X}", err);
+	if (pStr)
+	{
+		std::string msg{ std::bit_cast<const char*>(pStr), size };
+		LocalFree(pStr);
+		return msg;
+	}
+	else return std::format("Error Code: {:X}", err);
 #elif BOOST_LINUX
 	int err = errno;
 	const char* str = strerror_r(err, error, maxlength);

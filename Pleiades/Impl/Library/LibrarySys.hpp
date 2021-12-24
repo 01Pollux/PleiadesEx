@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Interfaces/LibrarySys.hpp"
-#include "User/IntPtr.hpp"
 #include <boost/system.hpp>
 #include <asmjit/asmjit.h>
+#include <shadowgarden/interfaces/LibrarySys.hpp>
+#include <shadowgarden/users/IntPtr.hpp>
 
 
 SG_NAMESPACE_BEGIN;

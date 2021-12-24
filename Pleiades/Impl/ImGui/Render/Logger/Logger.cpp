@@ -40,7 +40,7 @@ void ImGui_JsonLogger::LoadLogs()
 			continue;
 
 		std::ifstream file(dir.path());
-		Json log{ Json::parse(file, nullptr, false, true) };
+		auto log{ nlohmann::json::parse(file, nullptr, false, true) };
 		if (log.is_discarded())
 			continue;
 

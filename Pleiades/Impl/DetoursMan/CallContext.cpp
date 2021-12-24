@@ -12,12 +12,12 @@ namespace ShadowGarden
 	/// <summary>
 	/// https://github.com/asmjit/asmjit/blob/master/src/asmjit/x86/x86emithelper.cpp#L171
 	/// </summary>
-	static JIT::Error EmitRegMove(JIT::x86::Compiler& comp, const JIT::Operand& dst_, const JIT::Operand& src_, uint32_t typeId);
+	static asmjit::Error EmitRegMove(asmjit::x86::Compiler& comp, const asmjit::Operand& dst_, const asmjit::Operand& src_, asmjit::TypeId typeId);
 
 
-	void CallContext::ManageArgs(const DetourDetail::TypeInfo& typeInfo, JIT::x86::Compiler& comp, bool load_from_compiler)
+	void CallContext::ManageArgs(const DetourDetail::TypeInfo& typeInfo, asmjit::x86::Compiler& comp, bool load_from_compiler)
 	{
-		using namespace JIT;
+		using namespace asmjit;
 
 		size_t arg_pos = 0;
 		if (typeInfo.has_this_ptr())
@@ -96,10 +96,9 @@ namespace ShadowGarden
 		memcpy(to.data(), from.data(), from.size());
 	}
 
-	void CallContext::ManageReturn(JIT::x86::Compiler& comp, bool read_from_compiler, const JIT::BaseReg& reg0, const JIT::BaseReg& reg1)
+	void CallContext::ManageReturn(asmjit::x86::Compiler& comp, bool read_from_compiler, const asmjit::BaseReg& reg0, const asmjit::BaseReg& reg1)
 	{
-		using namespace JIT;
-		using RegGroup = x86::Reg::RegGroup;
+		using namespace asmjit;
 
 		auto& out_addr = m_PassRet.m_CurData;
 		x86::Mem mem(uint64_t(out_addr.data()), out_addr.size());
@@ -124,12 +123,12 @@ namespace ShadowGarden
 		}
 	}
 
-	void CallContext::ManageReturnInMem(JIT::x86::Compiler& comp, bool read_from_compiler, const JIT::BaseReg& outreg)
+	void CallContext::ManageReturnInMem(asmjit::x86::Compiler& comp, bool read_from_compiler, const asmjit::BaseReg& outreg)
 	{
-		using namespace JIT;
+		using namespace asmjit;
 
 		InvokeNode* pFunc;
-		comp.invoke(&pFunc, memcpy, FuncSignatureT<void*, void*, void const*, size_t>());
+		comp.invoke(&pFunc, memcpy, FuncSignatureT<void*, void*, const void*, size_t>());
 		
 		if (read_from_compiler)
 		{
@@ -178,10 +177,10 @@ namespace ShadowGarden
 	}
 
 
-	static JIT::Error EmitRegMove(JIT::x86::Compiler& comp, const JIT::Operand& dst_, const JIT::Operand& src_, uint32_t typeId)
+	static asmjit::Error EmitRegMove(asmjit::x86::Compiler& comp, const asmjit::Operand& dst_, const asmjit::Operand& src_, asmjit::TypeId typeId)
 	{
-		using namespace JIT;
-		using namespace JIT::x86;
+		using namespace asmjit;
+		using namespace asmjit::x86;
 
 		Operand dst(dst_);
 		Operand src(src_);
@@ -208,68 +207,68 @@ namespace ShadowGarden
 
 		switch (typeId)
 		{
-		case Type::kIdI8:
-		case Type::kIdU8:
-		case Type::kIdI16:
-		case Type::kIdU16:
+		case TypeId::kInt8:
+		case TypeId::kUInt8:
+		case TypeId::kInt16:
+		case TypeId::kUInt16:
 			// Special case - 'movzx' load.
 			if (memFlags & kSrcMem)
 			{
 				instId = Inst::kIdMovzx;
-				dst.setSignature(Reg::signatureOfT<Reg::kTypeGpd>());
+				dst.setSignature(Reg::signatureOfT<RegType::kX86_Gpd>());
 			}
 			else if (!memFlags)
 			{
 				// Change both destination and source registers to GPD (safer, no dependencies).
-				dst.setSignature(Reg::signatureOfT<Reg::kTypeGpd>());
-				src.setSignature(Reg::signatureOfT<Reg::kTypeGpd>());
+				dst.setSignature(Reg::signatureOfT<RegType::kX86_Gpd>());
+				src.setSignature(Reg::signatureOfT<RegType::kX86_Gpd>());
 			}
 			__fallthrough;
 
-		case Type::kIdI32:
-		case Type::kIdU32:
-		case Type::kIdI64:
-		case Type::kIdU64:
+		case TypeId::kInt32:
+		case TypeId::kUInt32:
+		case TypeId::kInt64:
+		case TypeId::kUInt64:
 			instId = Inst::kIdMov;
 			break;
 
-		case Type::kIdMmx32:
+		case TypeId::kMmx32:
 			instId = Inst::kIdMovd;
 			if (memFlags) break;
 			__fallthrough;
 
-		case Type::kIdMmx64: instId = Inst::kIdMovq; break;
-		case Type::kIdMask8: instId = Inst::kIdKmovb; break;
-		case Type::kIdMask16: instId = Inst::kIdKmovw; break;
-		case Type::kIdMask32: instId = Inst::kIdKmovd; break;
-		case Type::kIdMask64: instId = Inst::kIdKmovq; break;
+		case TypeId::kMmx64: instId = Inst::kIdMovq; break;
+		case TypeId::kMask8: instId = Inst::kIdKmovb; break;
+		case TypeId::kMask16: instId = Inst::kIdKmovw; break;
+		case TypeId::kMask32: instId = Inst::kIdKmovd; break;
+		case TypeId::kMask64: instId = Inst::kIdKmovq; break;
 
 		default:
 		{
-			const uint32_t elementTypeId = Type::baseOf(typeId);
-			if (Type::isVec32(typeId) && memFlags)
+			const TypeId elementTypeId = TypeUtils::scalarOf(typeId);
+			if (TypeUtils::isVec32(typeId) && memFlags)
 			{
 				overrideMemSize = 4;
-				if (elementTypeId == Type::kIdF32)
+				if (elementTypeId == TypeId::kFloat32)
 					instId = is_avx_on ? Inst::kIdVmovss : Inst::kIdMovss;
 				else
 					instId = is_avx_on ? Inst::kIdVmovd : Inst::kIdMovd;
 				break;
 			}
 
-			if (Type::isVec64(typeId) && memFlags)
+			if (TypeUtils::isVec64(typeId) && memFlags)
 			{
 				overrideMemSize = 8;
-				if (elementTypeId == Type::kIdF64)
+				if (elementTypeId == TypeId::kFloat64)
 					instId = is_avx_on ? Inst::kIdVmovsd : Inst::kIdMovsd;
 				else
 					instId = is_avx_on ? Inst::kIdVmovq : Inst::kIdMovq;
 				break;
 			}
 
-			if (elementTypeId == Type::kIdF32)
+			if (elementTypeId == TypeId::kFloat32)
 				instId = is_avx_on ? Inst::kIdVmovaps : Inst::kIdMovaps;
-			else if (elementTypeId == Type::kIdF64)
+			else if (elementTypeId == TypeId::kFloat64)
 				instId = is_avx_on ? Inst::kIdVmovapd : Inst::kIdMovapd;
 			else if (!comp.func()->frame().isAvx512Enabled())
 				instId = is_avx_on ? Inst::kIdVmovdqa : Inst::kIdMovdqa;

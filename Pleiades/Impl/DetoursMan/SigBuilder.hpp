@@ -2,10 +2,9 @@
 
 #include <unordered_map>
 #include <asmjit/asmjit.h>
-
 #include <nlohmann/Json.hpp>
-#include "TypeTable.hpp"
 
+#include "TypeTable.hpp"
 
 SG_NAMESPACE_BEGIN;
 
@@ -27,9 +26,9 @@ namespace DetourDetail
 
 		struct RegAndSize
 		{
-			JIT::BaseReg Reg;
+			asmjit::BaseReg Reg;
 			size_t		Size{ };
-			JIT::BaseReg ExtraReg;
+			asmjit::BaseReg ExtraReg;
 		};
 
 		bool has_ret() const noexcept
@@ -58,14 +57,14 @@ namespace DetourDetail
 		}
 
 
-		template<typename _Ty = JIT::BaseReg>
+		template<typename _Ty = asmjit::BaseReg>
 		const _Ty& ret(bool low = false) const noexcept
 		{
 			return m_Ret[low ? 1 : 0].Reg.as<_Ty>();
 		}
 
 
-		template<typename _Ty = JIT::BaseReg>
+		template<typename _Ty = asmjit::BaseReg>
 		const _Ty& ret_mem() const noexcept
 		{
 			return m_Ret[0].Reg.as<_Ty>();
@@ -77,13 +76,13 @@ namespace DetourDetail
 			return m_ContainThisPtr;
 		}
 
-		const JIT::x86::Gp& this_() const noexcept
+		const asmjit::x86::Gp& this_() const noexcept
 		{
-			return m_Args[0].Reg.as<JIT::x86::Gp>();
+			return m_Args[0].Reg.as<asmjit::x86::Gp>();
 		}
 
 
-		template<typename _Ty = JIT::BaseReg>
+		template<typename _Ty = asmjit::BaseReg>
 		const _Ty& arg(size_t pos) const noexcept
 		{
 			return m_Args[pos + arg_offset()].Reg.as<_Ty>();
@@ -147,36 +146,36 @@ namespace DetourDetail
 	class SigBuilder
 	{
 	public:
-		SigBuilder(const Json& sig_data, std::string& err);
+		SigBuilder(const nlohmann::json& sig_data, std::string& err);
 
-		const JIT::FuncSignature& get_sig() const noexcept
+		const asmjit::FuncSignature& get_sig() const noexcept
 		{
 			return m_FuncSig;
 		}
 
-		std::unique_ptr<CallContext> load_args(JIT::x86::Compiler& comp, TypeInfo& info);
+		std::unique_ptr<CallContext> load_args(asmjit::x86::Compiler& comp, TypeInfo& info);
 
 	private:
 		void SetCallConv(const std::string& callconv);
 
-		void ManageFuncFrame(JIT::FuncFrame& func_frame) const;
+		void ManageFuncFrame(asmjit::FuncFrame& func_frame) const;
 
-		JIT::FuncSignatureBuilder m_FuncSig;
+		asmjit::FuncSignatureBuilder m_FuncSig;
 
 		/// <summary>
 		/// 'return' section
 		/// contains full types of return value
 		/// </summary>
-		std::vector<uint32_t> m_RetTypes;
+		std::vector<asmjit::TypeId> m_RetTypes;
 
 		/// <summary>
 		/// 'Arguments' section
 		/// first pair is the underlying type
 		/// second pair is for 'constness' of the type
 		/// </summary>
-		std::vector<std::pair<std::vector<uint32_t>, bool>> m_ArgTypes;
+		std::vector<std::pair<std::vector<asmjit::TypeId>, bool>> m_ArgTypes;
 
-		const Json& m_SigInfo;
+		const nlohmann::json& m_SigInfo;
 
 		bool m_MutableThisPtr{ };
 		TypeTable m_Types;

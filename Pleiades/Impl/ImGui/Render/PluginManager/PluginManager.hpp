@@ -27,7 +27,7 @@ struct ImGuiPlInfo
 {
 	std::string PluginName;
 	IPlugin*	Plugin{ };
-	Json		Logs;
+	nlohmann::json	Logs;
 	PluginState State{ PluginState::Unloaded };
 
 	void Load();

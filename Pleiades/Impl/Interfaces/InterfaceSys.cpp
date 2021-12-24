@@ -12,7 +12,7 @@ SG_NAMESPACE_BEGIN;
 
 Version DLLManager::GetHostVersion()
 {
-	constexpr Version hostVersion{ "1.25.0.0" };
+	constexpr Version hostVersion{ "1.3.0.0" };
 	return hostVersion;
 }
 
@@ -40,8 +40,10 @@ bool DLLManager::BasicInit()
 		ExposeInterface(info.Name, info.IFace, nullptr);
 	}
 
+	auto maincfg{ nlohmann::json::parse(std::ifstream(LibraryManager::MainCfg), nullptr, false, true) };
+	if (maincfg.is_discarded())
+		return false;
 
-	Json maincfg = Json::parse(std::ifstream(LibraryManager::MainCfg));
 	{
 		auto& name = maincfg["host name"];
 		SG::lib_manager.SetHostName(name.is_string() ? name : "any");
@@ -52,9 +54,18 @@ bool DLLManager::BasicInit()
 
 	auto plugins = maincfg.find("plugins");
 	if (plugins != maincfg.end() && plugins->is_array() && !plugins->empty())
-		std::thread([](Json&& plugins) { SG::plugin_manager.LoadAllDLLs(plugins); }, std::move(*plugins)).detach();
+		std::thread([](nlohmann::json&& plugins) { SG::plugin_manager.LoadAllDLLs(plugins); }, std::move(*plugins)).detach();
 
 	return true;
+}
+
+void DLLManager::BasicShutdown()
+{
+	auto maincfg{ nlohmann::json::parse(std::ifstream(LibraryManager::MainCfg)) };
+	SG::imgui_iface.SaveImGui(maincfg);
+	std::ofstream file(LibraryManager::MainCfg);
+	file.width(2);
+	file << maincfg;
 }
 
 bool DLLManager::ExposeInterface(const char* iface_name, IInterface* iface, IPlugin* owner)

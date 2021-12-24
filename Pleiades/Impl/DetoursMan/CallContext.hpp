@@ -2,8 +2,8 @@
 
 #include <stack>
 #include <asmjit/asmjit.h>
+#include <shadowgarden/interfaces/HookArgs.hpp>
 
-#include "Interfaces/HookArgs.hpp"
 #include "SigBuilder.hpp"
 
 
@@ -14,7 +14,7 @@ class CallContext
 public:
 	struct InitToken
 	{
-		JIT::FuncSignatureBuilder FuncSig;
+		asmjit::FuncSignatureBuilder FuncSig;
 		PassRet	RetData;
 		PassArgs ArgsData;
 	};
@@ -24,7 +24,7 @@ public:
 	/// <summary>
 	/// Read/Write args from/to compiler in detoured function
 	/// </summary>
-	void ManageArgs(const DetourDetail::TypeInfo& typeInfo, JIT::x86::Compiler& comp, bool read_from_compiler);
+	void ManageArgs(const DetourDetail::TypeInfo& typeInfo, asmjit::x86::Compiler& comp, bool read_from_compiler);
 
 	/// <summary>
 	/// Check for any changed args and write them to 'm_PassArgs.m_CurData'
@@ -40,13 +40,13 @@ public:
 	/// (Return in register)
 	/// Read/Write return from/to compiler in the detoured function
 	/// </summary>
-	void ManageReturn(JIT::x86::Compiler& comp, bool read_from_compiler, const JIT::BaseReg& reg0, const JIT::BaseReg& reg1);
+	void ManageReturn(asmjit::x86::Compiler& comp, bool read_from_compiler, const asmjit::BaseReg& reg0, const asmjit::BaseReg& reg1);
 
 	/// <summary>
 	/// (Return in stack)
 	/// Read/Write return from/to compiler in the detoured function
 	/// </summary>
-	void ManageReturnInMem(JIT::x86::Compiler& comp, bool read_from_compiler, const JIT::BaseReg& outreg);
+	void ManageReturnInMem(asmjit::x86::Compiler& comp, bool read_from_compiler, const asmjit::BaseReg& outreg);
 
 	/// <summary>
 	/// Save current return value in 'm_SavedRets'
@@ -64,7 +64,7 @@ public:
 	void ResetState();
 
 public:
-	JIT::FuncSignatureBuilder	m_FuncSig;
+	asmjit::FuncSignatureBuilder	m_FuncSig;
 
 	PassRet	m_PassRet;
 	PassArgs m_PassArgs;

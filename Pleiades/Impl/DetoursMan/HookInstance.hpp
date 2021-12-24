@@ -3,11 +3,11 @@
 #include <set>
 #include <nlohmann/Json_Fwd.hpp>
 
-#include "Detour.hpp"
-#include "Interfaces/HooksManager.hpp"
+#include <shadowgarden/interfaces/HooksManager.hpp>
+#include <shadowgarden/users/IntPtr.hpp>
 
+#include "Detour.hpp"
 #include "CallContext.hpp"
-#include "User/IntPtr.hpp"
 
 
 SG_NAMESPACE_BEGIN;
@@ -25,7 +25,7 @@ struct HookInfo
 class HookInstance : public IHookInstance
 {
 public:
-	HookInstance(IntPtr original_function, const Json& data, std::string& out_err);
+	HookInstance(IntPtr original_function, const nlohmann::json& data, std::string& out_err);
 	~HookInstance() noexcept;
 
 public:
@@ -45,7 +45,7 @@ private:
 	struct DataInfo
 	{
 		const DetourDetail::TypeInfo& typeInfo;
-		JIT::x86::Compiler& Compiler;
+		asmjit::x86::Compiler& Compiler;
 	};
 
 	void* AllocCallbackHandler(DetourDetail::SigBuilder& sigbuilder, std::string& out_err);
@@ -53,7 +53,7 @@ private:
 	bool ValidateRegisters(DataInfo comp, std::string& out_err);
 	bool RunHandler(bool is_post);
 
-	void InvokeCallbacks(DataInfo info, bool post, const JIT::x86::Gp& ret);
+	void InvokeCallbacks(DataInfo info, bool post, const asmjit::x86::Gp& ret);
 	void InvokeOriginal(DataInfo info);
 
 	void ReadReturn(DataInfo info);

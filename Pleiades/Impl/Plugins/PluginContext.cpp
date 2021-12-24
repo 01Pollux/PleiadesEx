@@ -3,9 +3,10 @@
 #include <fstream>
 #include <list>
 
-#include "PluginContext.hpp"
+#include <shadowgarden/users/String.hpp>
+
 #include "Impl/Library/LibrarySys.hpp"
-#include <User/String.hpp>
+#include "PluginContext.hpp"
 
 SG_NAMESPACE_BEGIN;
 
@@ -28,18 +29,18 @@ PluginContext::PluginContext(fs::path& root_path, const std::string& cur_name, c
 
 		try
 		{
-			Json cfg = Json::parse(file, nullptr, true, true);
+			auto cfg{ nlohmann::json::parse(file, nullptr, true, true) };
 			const auto info_sec = cfg.find(InfoSection::Name);
 			
 			if (info_sec != cfg.end())
 			{
 				// check for the supported processes
 				{
-					if (const Json& proc_list = (*info_sec)[InfoSection::SupportedProcesses];
+					if (const nlohmann::json& proc_list = (*info_sec)[InfoSection::SupportedProcesses];
 						proc_list.is_array() && proc_list.size() > 0)
 					{
 						bool supported = false;
-						for (const Json& proc : proc_list)
+						for (const nlohmann::json& proc : proc_list)
 						{
 							if (proc == proc_name)
 							{
@@ -156,15 +157,15 @@ std::filesystem::path PluginContext::GetConfigPath()
 	return std::format("{0}/{1}/{1}.config.json", LibraryManager::PluginsDir, name);
 }
 
-Json PluginContext::OpenConfig()
+nlohmann::json PluginContext::OpenConfig()
 {
 	std::ifstream file(GetConfigPath());
-	return Json::parse(file, nullptr, true, true);
+	return nlohmann::json::parse(file, nullptr, true, true);
 }
 
 void PluginContext::LoadConfig()
 {
-	Json cfg = OpenConfig();
+	nlohmann::json cfg = OpenConfig();
 	std::ifstream file(GetConfigPath());
 	file >> cfg;
 	m_Plugin->OnReloadConfig(cfg[PluginContext::VarsSection]);
@@ -172,7 +173,7 @@ void PluginContext::LoadConfig()
 
 void PluginContext::SaveConfig()
 {
-	Json cfg = OpenConfig();
+	nlohmann::json cfg = OpenConfig();
 	m_Plugin->OnSaveConfig(cfg[PluginContext::VarsSection]);
 	std::ofstream file(GetConfigPath());
 	file.width(2);

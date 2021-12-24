@@ -8,7 +8,7 @@ SG_NAMESPACE_BEGIN;
 struct ImGuiJsLogInfo
 {
 	std::string FileName;
-	Json Logs;
+	nlohmann::json Logs;
 
 	/// <summary>
 	/// Draw popup states
@@ -34,7 +34,7 @@ struct ImGuiJsLogInfo
 	/// </summary>
 	/// <param name="is_type">true to only process '/t=' command, false otherwise</param>
 	/// <returns></returns>
-	bool FilterInfo(const ImGuiTextFilter& filter, Json::const_iterator iter, bool is_type) const;
+	bool FilterInfo(const ImGuiTextFilter& filter, nlohmann::json::const_iterator iter, bool is_type) const;
 };
 
 struct ImGuiPlLogSection

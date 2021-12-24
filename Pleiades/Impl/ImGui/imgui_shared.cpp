@@ -114,7 +114,7 @@ void ImGuiInterface::LoadFonts()
 		std::ifstream config_file(std::string(path) + "/Fonts.json");
 		if (config_file)
 		{
-			Json fonts = Json::parse(config_file, nullptr, false, true);
+			nlohmann::json fonts = nlohmann::json::parse(config_file, nullptr, false, true);
 			for (auto font = fonts.begin(); font != fonts.end(); font++)
 			{
 				if (!font->is_object())

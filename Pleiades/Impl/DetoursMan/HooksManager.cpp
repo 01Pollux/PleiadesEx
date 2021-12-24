@@ -1,6 +1,7 @@
 #include "HooksManager.hpp"
 
-#include "Interfaces/PluginSys.hpp"
+#include <shadowgarden/interfaces/PluginSys.hpp>
+
 #include "Impl/Library/GameData.hpp"
 #include "Impl/Interfaces/Logger.hpp"
 
@@ -12,7 +13,7 @@ DetoursManager detour_manager;
 IHookInstance* DetoursManager::LoadHook(const std::vector<std::string>& keys, const char* hookName, void* pThis, IGameData* gamedata, IntPtr lookupKey, IntPtr pAddr)
 {
 	GameData* pData{ static_cast<GameData*>(gamedata) };
-	Json res = pData->ReadDetour(keys, hookName);
+	auto res = pData->ReadDetour(keys, hookName);
 
 	if (res.empty())
 	{
@@ -30,14 +31,14 @@ IHookInstance* DetoursManager::LoadHook(const std::vector<std::string>& keys, co
 			Virtual, Address, Signature
 		};
 
-		const auto get_addr_from_cfg = [&pData] (SecType sec_type, Json& cfg, void* pThis = nullptr) -> IntPtr
+		const auto get_addr_from_cfg = [&pData] (SecType sec_type, nlohmann::json& cfg, void* pThis = nullptr) -> IntPtr
 		{
 			const char* sec_name =
 				sec_type == SecType::Virtual ? "virtual" :
 				sec_type == SecType::Address ? "address" :
 				sec_type == SecType::Signature ? "name" : nullptr;
 
-			Json& info = cfg[sec_name];
+			auto& info = cfg[sec_name];
 			if (info.is_array())
 			{
 				// "sec_name": [ "Main", "Class", "Subclass", "Sub-subclass", "FuncName" ]
@@ -76,7 +77,7 @@ IHookInstance* DetoursManager::LoadHook(const std::vector<std::string>& keys, co
 			return nullptr;
 		};
 
-		if (Json& sig_sec = res["Signature"], &sig_name = sig_sec["name"];
+		if (auto& sig_sec = res["Signature"], &sig_name = sig_sec["name"];
 			sig_name.empty())
 		{
 			if (pThis)

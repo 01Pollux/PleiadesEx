@@ -5,33 +5,36 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/predef.h>
 
-#include "GameData.hpp"
+#include <shadowgarden/interfaces/PluginSys.hpp>
+
 #include "Impl/Library/LibrarySys.hpp"
-#include "Interfaces/PluginSys.hpp"
 #include "Impl/Interfaces/Logger.hpp"
+#include "GameData.hpp"
 
 
 SG_NAMESPACE_BEGIN;
 	
 GameData::GameData(IPlugin* pPlugin) :
-	m_PluginFileName(pPlugin ? pPlugin->GetFileName() : ILibraryManager::MainName),
+	m_Plugin(pPlugin),
 	m_Paths{ std::format("{}.{}", ILibraryManager::CommonTag, SG::lib_manager.GetHostName()) }
 {
 	if (pPlugin)
-		m_Paths.emplace_back(std::format("{0}/{1}/{1}.{2}", ILibraryManager::PluginsDir, m_PluginFileName, SG::lib_manager.GetHostName()));
+		m_Paths.emplace_back(std::format("{0}/{1}/{1}.{2}", ILibraryManager::PluginsDir, pPlugin ? pPlugin->GetFileName() : ILibraryManager::MainName, SG::lib_manager.GetHostName()));
 }
 
 void GameData::PushFiles(std::initializer_list<const char*> files)
 {
 	const std::string& host_name = SG::lib_manager.GetHostName();
 	m_Paths.reserve(m_Paths.size() + files.size());
+	const char* const file_name = this->GetPluginName();
+
 	for (auto file : files)
 	{
 		m_Paths.emplace_back(
 			std::format(
 				"{0}/{1}{2}.{3}",
 				LibraryManager::PluginsDir,
-				m_PluginFileName,
+				file_name,
 				file,
 				host_name
 			)
@@ -50,8 +53,8 @@ IntPtr GameData::ReadSignature(const std::vector<std::string>& keys, const std::
 			if (!file)
 				continue;
 
-			const Json sig_info = Json::parse(file, nullptr, true, true);
-			const Json* key = JumpTo(sig_info, keys);
+			auto sig_info{ nlohmann::json::parse(file, nullptr, true, true) };
+			auto key = JumpTo(sig_info, keys);
 
 			if (key && key->is_object())
 			{
@@ -73,7 +76,7 @@ IntPtr GameData::ReadSignature(const std::vector<std::string>& keys, const std::
 	{
 		SG_LOG_ERROR(
 			SG_MESSAGE("Exception reported while reading signature."),
-			SG_LOGARG("Plugin", m_PluginFileName),
+			SG_LOGARG("Plugin", this->GetPluginName()),
 			SG_LOGARG("Keys", keys),
 			SG_LOGARG("Signature", signame),
 			SG_LOGARG("Exception", ex.what())
@@ -93,8 +96,8 @@ IntPtr GameData::ReadAddress(const std::vector<std::string>& keys, const std::st
 			if (!file)
 				continue;
 
-			const Json addr_info = Json::parse(file, nullptr, true, true);
-			const Json* key = JumpTo(addr_info, keys);
+			auto addr_info{ nlohmann::json::parse(file, nullptr, true, true) };
+			auto key = JumpTo(addr_info, keys);
 
 			if (key && key->is_object())
 			{
@@ -116,7 +119,7 @@ IntPtr GameData::ReadAddress(const std::vector<std::string>& keys, const std::st
 	{
 		SG_LOG_ERROR(
 			SG_MESSAGE("Exception reported while reading address."),
-			SG_LOGARG("Plugin", m_PluginFileName),
+			SG_LOGARG("Plugin", this->GetPluginName()),
 			SG_LOGARG("Address", addrname),
 			SG_LOGARG("Keys", keys),
 			SG_LOGARG("Exception", ex.what())
@@ -146,7 +149,7 @@ std::optional<int> GameData::ReadOffset(const std::vector<std::string>& keys, co
 }
 
 
-Json GameData::ReadDetour(const std::vector<std::string>& keys, const std::string& detourname)
+nlohmann::json GameData::ReadDetour(const std::vector<std::string>& keys, const std::string& detourname)
 {
 	try
 	{
@@ -156,8 +159,8 @@ Json GameData::ReadDetour(const std::vector<std::string>& keys, const std::strin
 			if (!file)
 				continue;
 
-			const auto detour = Json::parse(file, nullptr, true, true);
-			const Json* key = JumpTo(detour, keys);
+			auto detour_info{ nlohmann::json::parse(file, nullptr, true, true) };
+			auto key = JumpTo(detour_info, keys);
 
 			if (key && key->is_object())
 			{
@@ -179,23 +182,23 @@ Json GameData::ReadDetour(const std::vector<std::string>& keys, const std::strin
 	{
 		SG_LOG_ERROR(
 			SG_MESSAGE("Exception reported while reading detour."),
-			SG_LOGARG("Plugin", m_PluginFileName),
+			SG_LOGARG("Plugin", this->GetPluginName()),
 			SG_LOGARG("Detour", detourname),
 			SG_LOGARG("Keys", keys),
 			SG_LOGARG("Exception", ex.what())
 		);
 	}
 
-	return Json{ };
+	return nlohmann::json{ };
 }
 
 
-const Json* GameData::JumpTo(const Json& main, const std::vector<std::string>& keys)
+const nlohmann::json* GameData::JumpTo(const nlohmann::json& main, const std::vector<std::string>& keys)
 {
-	const Json* data(&main);
+	auto data = &main;
 
 	const bool bad_key = false;
-	for (const auto key : keys)
+	for (const auto& key : keys)
 	{
 		if (!data->contains(key))
 			return nullptr;
@@ -205,7 +208,7 @@ const Json* GameData::JumpTo(const Json& main, const std::vector<std::string>& k
 	return data;
 }
 
-IntPtr GameData::LoadSignature(const Json& info, bool is_signature)
+IntPtr GameData::LoadSignature(const nlohmann::json& info, bool is_signature)
 {
 	if (!info.contains("library"))
 	{
@@ -223,7 +226,7 @@ IntPtr GameData::LoadSignature(const Json& info, bool is_signature)
 	constexpr const char* platform = BOOST_OS_WINDOWS ? "windows" : BOOST_OS_LINUX ? "linux" : "any";
 	static_assert(platform != "any");
 
-	const Json& sig = info[platform];
+	auto& sig = info[platform];
 
 	IntPtr ptr = is_signature ?
 		lib->FindBySignature(sig["pattern"]) :
@@ -238,7 +241,7 @@ IntPtr GameData::LoadSignature(const Json& info, bool is_signature)
 
 	if (sig.contains("extra"))
 	{
-		const Json& extra = sig["extra"];
+		auto& extra = sig["extra"];
 		if (extra.is_array())
 		{
 			const size_t size = extra.size();
@@ -279,8 +282,8 @@ std::optional<int> GameData::LoadOffset(const std::vector<std::string>& keys, co
 			if (!file)
 				continue;
 
-			const Json sig_data = Json::parse(file, nullptr, true, true);
-			const Json* key = JumpTo(sig_data, keys);
+			auto offset_info{ nlohmann::json::parse(file, nullptr, true, true) };
+			auto key = JumpTo(offset_info, keys);
 
 			if (key)
 			{
@@ -302,7 +305,7 @@ std::optional<int> GameData::LoadOffset(const std::vector<std::string>& keys, co
 	{
 		SG_LOG_ERROR(
 			SG_MESSAGE(is_offset ? "Exception reported while reading offsets." : "Exception reported while reading virtuals."),
-			SG_LOGARG("Plugin", m_PluginFileName),
+			SG_LOGARG("Plugin", this->GetPluginName()),
 			SG_LOGARG("Name", name),
 			SG_LOGARG("Keys", keys),
 			SG_LOGARG("Exception", ex.what())
@@ -322,6 +325,11 @@ std::vector<std::string> GameData::GetPaths(const std::string_view& key) const
 	}
 
 	return paths;
+}
+
+const char* GameData::GetPluginName() const noexcept
+{
+	return m_Plugin ? m_Plugin->GetFileName().c_str() : ILibraryManager::MainName;
 }
 
 SG_NAMESPACE_END;

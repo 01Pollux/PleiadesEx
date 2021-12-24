@@ -1,10 +1,11 @@
 #pragma once
 
-#include <nlohmann/Json.hpp>
 #include <optional>
 
+#include <nlohmann/Json.hpp>
+#include <shadowgarden/interfaces/GameData.hpp>
+
 #include "LibrarySys.hpp"
-#include "Interfaces/GameData.hpp"
 
 SG_NAMESPACE_BEGIN;
 	
@@ -26,19 +27,21 @@ public:
 	std::optional<int> ReadOffset(const std::vector<std::string>& keys, const std::string& name) override;
 
 public:
-	Json ReadDetour(const std::vector<std::string>& keys, const std::string& signame);
+	nlohmann::json ReadDetour(const std::vector<std::string>& keys, const std::string& signame);
 
 private:
-	const Json* JumpTo(const Json& main, const std::vector<std::string>& keys);
+	const nlohmann::json* JumpTo(const nlohmann::json& main, const std::vector<std::string>& keys);
 
-	IntPtr LoadSignature(const Json& info, bool is_signature);
+	IntPtr LoadSignature(const nlohmann::json& info, bool is_signature);
 
 	std::optional<int> LoadOffset(const std::vector<std::string>& keys, const std::string& name, bool is_offset);
 
 	std::vector<std::string> GetPaths(const std::string_view& key) const;
 
+	const char* GetPluginName() const noexcept;
+
 private:
-	const std::string& m_PluginFileName;
+	IPlugin*				 m_Plugin;
 	std::vector<std::string> m_Paths;
 };
 

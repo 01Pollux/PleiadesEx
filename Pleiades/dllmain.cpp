@@ -1,13 +1,14 @@
-
 #include <boost/config.hpp>
 
-#include <User/Profiler.hpp>
-#include <User/Modules.hpp>
-#include <User/String.hpp>
+#include <shadowgarden/users/Profiler.hpp>
+#include <shadowgarden/users/Modules.hpp>
+#include <shadowgarden/users/String.hpp>
+#include <shadowgarden/users/Types.hpp>
 
 #include "Impl/Plugins/PluginManager.hpp"
 #include "Impl/Library/LibrarySys.hpp"
 #include "Impl/Interfaces/Logger.hpp"
+#include "Impl/ImGui/imgui_iface.hpp"
 
 #if BOOST_WINDOWS
 #define WIN32_MEAN_AND_LEAN
@@ -23,7 +24,7 @@ static void* mainModule;
 static LONG NTAPI OnRaiseException(_In_ PEXCEPTION_POINTERS ExceptionInfo);
 #endif
 
-extern "C" BOOST_SYMBOL_EXPORT unsigned long
+extern "C" BOOST_SYMBOL_EXPORT bool
 Tella_LoadDLL(void* hMod)
 {
 #if BOOST_WINDOWS
@@ -39,29 +40,35 @@ Tella_LoadDLL(void* hMod)
 
 	if (!SG::plugin_manager.BasicInit())
 	{
-		SG::Profiler::Manager::Release();
+        RemoveVectoredExceptionHandler(g_ExceptionHandler);
+        SG::Profiler::Manager::Release();
+
 		SG_LOG_FATAL(
 			SG_MESSAGE("Failed to load main plugin, check for any missing configs.")
 		);
-		return 0;
+		return false;
 	}
 
-	return 1;
+	return true;
 }
 
-static unsigned long  
+static SG::DWord
 BOOST_WINAPI_DETAIL_STDCALL
 Tella_EjectDLL(void* hMod)
 {
 	SG::plugin_manager.UnloadAllDLLs();
 
+    SG::Profiler::Manager::Release();
+    
+    SG::plugin_manager.BasicShutdown();
+
+    RemoveVectoredExceptionHandler(g_ExceptionHandler);
+
 #if BOOST_WINDOWS
 	FreeLibraryAndExitThread(std::bit_cast<HMODULE>(hMod), EXIT_SUCCESS);
 #endif
 
-	SG::Profiler::Manager::Release();
-    RemoveVectoredExceptionHandler(g_ExceptionHandler);
-    return 1;
+    return true;
 }
 
 
@@ -81,7 +88,7 @@ void SG::DLLManager::Shutdown() noexcept
 
 LONG NTAPI OnRaiseException(_In_ PEXCEPTION_POINTERS ExceptionInfo)
 {
-    std::unique_ptr<void, decltype([](void* handle){ FreeLibrary(std::bit_cast<HMODULE>(handle)); })> DBGHelp{ std::bit_cast<void*>(LoadLibraryW(L"DBGHelp.dll")) };
+    std::unique_ptr<void, decltype([](void* handle){ FreeLibrary(std::bit_cast<HMODULE>(handle)); })> DBGHelp{ std::bit_cast<void*>(LoadLibrary(TEXT("DBGHelp.dll"))) };
     if (!DBGHelp)
         return EXCEPTION_CONTINUE_SEARCH;
 

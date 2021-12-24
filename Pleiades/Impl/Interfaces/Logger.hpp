@@ -2,10 +2,9 @@
 
 #include <thread>
 #include <mutex>
-#include "Interfaces/Logger.hpp"
+#include <shadowgarden/interfaces/Logger.hpp>
 
-
-SG_NAMESPACE_BEGIN
+SG_NAMESPACE_BEGIN;
 
 class LoggerImpl : public ILogger
 {
@@ -22,9 +21,9 @@ public:
 private:
 	struct InternalLoggerInfo;
 
-	std::list<InternalLoggerInfo>		m_PendingLogs;
-	std::jthread _LogTimer;
-	std::mutex	 _LogMutex;
+	std::list<InternalLoggerInfo> m_PendingLogs;
+	std::jthread m_LogTimer;
+	std::mutex	 m_LogMutex;
 };
 
 extern LoggerImpl logger;

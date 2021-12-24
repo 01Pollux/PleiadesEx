@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Interfaces/EventManager.hpp"
+#include <shadowgarden/interfaces/EventManager.hpp>
 
 SG_NAMESPACE_BEGIN;
 

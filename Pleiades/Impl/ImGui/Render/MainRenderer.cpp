@@ -16,7 +16,7 @@ bool ImGui_BrdigeRenderer::RenderAll()
 		if (!ImGui::IsPopupOpen("##About"))
 			ImGui::OpenPopup("##About");
 
-		if (ImGui::BeginPopupModal("##About", &show_about))
+		if (ImGui::BeginPopupModal("##About", &show_about, ImGuiWindowFlags_NoResize))
 		{
 			ImGui_BrdigeRenderer::RenderAbout();
 			ImGui::EndPopup();
@@ -63,8 +63,11 @@ bool ImGui_BrdigeRenderer::RenderAll()
 
 		if (ImGui::BeginMenu("Tabs"))
 		{
-			for (auto& tabinfo : MainTabsInfo)
-				ImGui::Selectable(tabinfo.Name, &tabinfo.isOpen, ImGuiSelectableFlags_DontClosePopups);
+			for (auto& tab : MainTabsInfo)
+			{
+				if (ImGui::Selectable(tab.Name, &tab.IsOpen, ImGuiSelectableFlags_DontClosePopups))
+					tab.IsFocused = true;
+			}
 			
 			ImGui::EndMenu();
 		}
@@ -75,26 +78,23 @@ bool ImGui_BrdigeRenderer::RenderAll()
 	ImGui::DockSpace(dock_id);
 
 	constexpr ImGuiWindowFlags tab_flags = ImGuiWindowFlags_NoCollapse;
-	for (auto fn_tab : {
-		std::pair{ &ImGui_BrdigeRenderer::RenderLogger,			MainTabsInfo_t::Type::Logger },
-		std::pair{ &ImGui_BrdigeRenderer::RenderProfiler,		MainTabsInfo_t::Type::Profiler },
-		std::pair{ &ImGui_BrdigeRenderer::RenderPropManager,	MainTabsInfo_t::Type::PropManager },
-		std::pair{ &ImGui_BrdigeRenderer::RenderPluginManager,	MainTabsInfo_t::Type::PluginsManager }
-	})
+
+	for (auto& tab : MainTabsInfo)
 	{
-		auto& tab = GetTab(fn_tab.second);
-		if (!tab.isOpen)
+		if (!tab.IsOpen)
 			continue;
 
-		ImGui::SetNextWindowDockID(dock_id, ImGuiCond_FirstUseEver);
-
-		if (ImGui::Begin(tab.Name, &tab.isOpen, tab_flags))
+		tab.IsFocused = false;
+		if (ImGui::Begin(tab.Name, &tab.IsOpen, tab_flags | ImGuiWindowFlags_NoFocusOnAppearing))
 		{
-			ImGui::PushID(&tab);
-			(this->*fn_tab.first)();
-			ImGui::PopID();
+			if (tab.IsFocused = tab.IsOpen)
+			{
+				ImGui::PushID(&tab);
+				(this->*tab.Callback)();
+				ImGui::PopID();
+			}
 		}
-
+		
 		ImGui::End();
 	}
 
@@ -135,6 +135,31 @@ void ImGui_BrdigeRenderer::RenderAbout()
 		ImGui::Text("By epezent.");
 		ImGui::Text("ImPlot is licensed under the MIT License, see LICENSE for more information.");
 	}
+}
+
+// [... Y X Y X ]
+// X: Are tabs open flags
+// Y: Are tabs focused flags
+void ImGui_BrdigeRenderer::LoadTabs(uint32_t serialized_tabs)
+{
+	for (ptrdiff_t i = 0; i < std::ssize(this->MainTabsInfo); ++i)
+	{
+		this->MainTabsInfo[i].IsOpen = (serialized_tabs & (1 << (i * 2))) != 0;
+		this->MainTabsInfo[i].IsFocused = (serialized_tabs & (1 << (i * 2 + 1))) != 0;
+	}
+}
+
+void ImGui_BrdigeRenderer::SaveTabs(nlohmann::json& out_config)
+{
+	uint32_t serialized_tabs{ };
+	for (ptrdiff_t i = 0; i < std::ssize(this->MainTabsInfo); ++i)
+	{
+		if (this->MainTabsInfo[i].IsOpen)
+			serialized_tabs |= (1 << (i * 2));
+		if (this->MainTabsInfo[i].IsFocused)
+			serialized_tabs |= (1 << (i * 2 + 1));
+	}
+	out_config = serialized_tabs;
 }
 
 SG_NAMESPACE_END;
