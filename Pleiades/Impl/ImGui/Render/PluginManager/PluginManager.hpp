@@ -4,16 +4,7 @@
 #include "../../imgui_iface.hpp"
 #include "Impl/Plugins/PluginManager.hpp"
 
-
-// TODO:
-// Read Profiler
-
-// PROFILER:
-// CPU usage
-// Callstack
-// Diagram
 SG_NAMESPACE_BEGIN;
-
 
 enum class PluginState : char8_t
 {
@@ -54,7 +45,6 @@ struct ImGuiPlManSection
 		Current = Plugins.end();
 	}
 };
-
 
 
 class ImGui_PluginManager

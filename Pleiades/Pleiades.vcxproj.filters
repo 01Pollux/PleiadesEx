@@ -159,6 +159,12 @@
     <ClCompile Include="Impl\ImGui\Backends\imgui_impl_win32.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Impl\Console\config.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\ImGui\Render\Console\Console.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Impl\Library\LibrarySys.hpp">
@@ -233,10 +239,10 @@
     <ClInclude Include="Impl\ImGui\imgui_iface.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Impl\ImGui\Backends\imgui_impl_dx9.h">
+    <ClInclude Include="Impl\Console\config.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Impl\ImGui\Backends\imgui_impl_win32.h">
+    <ClInclude Include="Impl\ImGui\Render\Console\Console.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -9,14 +9,14 @@ namespace ShadowGarden::DetourDetail
 {
 	TypeTable::TypeTable()
 	{
-		std::ifstream file(std::string(LibraryManager::CommonTag) + ".JitTypes.json");
+		std::ifstream file(std::string(LibraryManager::CommonTag) + ".jit_types.json");
 		if (file)
-			m_TypeInfos = nlohmann::json::parse(file, nullptr, true, true);
+			m_TypeInfos = nlohmann::json::parse(file, nullptr, false, true);
 
-		if (m_TypeInfos.is_null())
+		if (m_TypeInfos.is_discarded())
 		{
 			SG_LOG_ERROR(
-				SG_MESSAGE("Failed to load Pleiades.JitTypes file")
+				SG_MESSAGE("Failed to load 'Pleiades.jit_types' file")
 			);
 		}
 	}

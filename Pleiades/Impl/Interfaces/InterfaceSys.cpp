@@ -6,7 +6,7 @@
 #include "Impl/Interfaces/Logger.hpp"		// logger
 #include "Impl/DetoursMan/HooksManager.hpp"	// detour_manager
 #include "Impl/ImGui/imgui_iface.hpp"		// imgui_iface
-
+#include "Impl/Console/config.hpp"			// console_manager
 
 SG_NAMESPACE_BEGIN;
 
@@ -34,6 +34,7 @@ bool DLLManager::BasicInit()
 			 InterfaceAndName{ &event_manager,	Interface_EventManager },
 			 InterfaceAndName{ &detour_manager,	Interface_DetoursManager },
 			 InterfaceAndName{ &imgui_iface,	Interface_ImGuiLoader },
+			 InterfaceAndName{ &console_manager,Interface_ConsoleManager },
 	})
 	{
 		// plugin is nullptr if its an internal interface, and shouldn't be removed at all cost

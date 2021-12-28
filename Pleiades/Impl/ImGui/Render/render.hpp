@@ -49,6 +49,8 @@ public:
 	void RenderLogger();
 	// Profiler
 	void RenderProfiler();
+	// Console
+	void RenderConsole();
 	// About
 	void RenderAbout();
 
@@ -81,27 +83,15 @@ public:
 		bool IsFocused{ false };
 
 		MainTabsInfo_t(const char* name, callback_t callback) noexcept : Name(name), Callback(callback) { }
-
-		enum class Type
-		{
-			PropManager,
-			PluginsManager,
-			Logger,
-			Profiler
-		};
 	};
 
-	MainTabsInfo_t MainTabsInfo[4]{
+	MainTabsInfo_t MainTabsInfo[5]{
 		{ ICON_FA_STOPWATCH	" Profiler",		&ImGui_BrdigeRenderer::RenderProfiler },
 		{ ICON_FA_BOOKMARK	" Logger",			&ImGui_BrdigeRenderer::RenderLogger }, 
 		{ ICON_FA_ARCHIVE	" Props Manager",	&ImGui_BrdigeRenderer::RenderPropManager },
 		{ ICON_FA_CLIPBOARD	" Plugins Manager",	&ImGui_BrdigeRenderer::RenderPluginManager },
+		{ ICON_FA_TERMINAL	" Console",			&ImGui_BrdigeRenderer::RenderConsole }
 	};
-
-	MainTabsInfo_t& GetTab(MainTabsInfo_t::Type type) noexcept
-	{
-		return MainTabsInfo[static_cast<size_t>(type)];
-	}
 
 	ImGuiThemesManager ThemeManager;
 };

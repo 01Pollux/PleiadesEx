@@ -15,6 +15,8 @@ SG_NAMESPACE_BEGIN;
 using PluginInitFn = SG::IPlugin* (__cdecl*)();
 constexpr const char* GlobalInitFunction = "Tella_GetPlugin";
 
+class ConCommand;
+
 class PluginContext
 {
 public:
@@ -87,6 +89,7 @@ private:
 
 	IPlugin*					m_Plugin{ };
 	std::unique_ptr<ILibrary>	m_PluginModule;
+
 	std::vector<IPlugin*>		m_Dependencies;
 
 	InfoSection	m_InfoSection;

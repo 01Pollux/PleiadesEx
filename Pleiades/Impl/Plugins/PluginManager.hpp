@@ -22,11 +22,6 @@ public:
 
 	void UnloadAllDLLs();
 
-private:
-	std::string GetProcessName();
-
-	void LoadOneDLL(const std::string& proc_name, std::filesystem::path& path, const std::string& name);
-
 	PluginContext* FindContext(const IPlugin* plugin) noexcept
 	{
 		for (auto& ctx : m_Plugins)
@@ -47,6 +42,11 @@ private:
 		}
 		return iter;
 	}
+
+private:
+	std::string GetProcessName();
+
+	void LoadOneDLL(const std::string& proc_name, std::filesystem::path& path, const std::string& name);
 
 public:
 	// Inherited via IInterfaceManager

@@ -223,6 +223,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="Impl\Console\config.cpp" />
     <ClCompile Include="Impl\ImGui\Backends\imgui_impl_dx9.cpp" />
     <ClCompile Include="Impl\ImGui\Backends\imgui_impl_win32.cpp" />
     <ClCompile Include="Impl\ImGui\imgui_endscene_h.cpp" />
@@ -230,6 +231,7 @@
     <ClCompile Include="Impl\ImGui\imgui.cpp" />
     <ClCompile Include="Impl\ImGui\Render\Compiled_Fonts\Arimo_Medium.cpp" />
     <ClCompile Include="Impl\ImGui\Render\Compiled_Fonts\FontAwesome900_Solid.cpp" />
+    <ClCompile Include="Impl\ImGui\Render\Console\Console.cpp" />
     <ClCompile Include="Impl\ImGui\Render\Logger\Filter.cpp" />
     <ClCompile Include="Impl\ImGui\Render\Logger\JsInfo.cpp" />
     <ClCompile Include="Impl\ImGui\Render\Logger\Logger.cpp" />
@@ -272,10 +274,10 @@
     <ClCompile Include="Impl\Interfaces\Logger.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Impl\ImGui\Backends\imgui_impl_dx9.h" />
-    <ClInclude Include="Impl\ImGui\Backends\imgui_impl_win32.h" />
+    <ClInclude Include="Impl\Console\config.hpp" />
     <ClInclude Include="Impl\ImGui\Defines.hpp" />
     <ClInclude Include="Impl\ImGui\imgui_iface.hpp" />
+    <ClInclude Include="Impl\ImGui\Render\Console\Console.hpp" />
     <ClInclude Include="Impl\ImGui\Render\Logger\Logger.hpp" />
     <ClInclude Include="Impl\ImGui\Render\PluginManager\PluginManager.hpp" />
     <ClInclude Include="Impl\ImGui\Render\Profiler\ImPlot\implot.h" />
