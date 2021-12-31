@@ -9,6 +9,7 @@
 #include "Impl/Library/LibrarySys.hpp"
 #include "Impl/Interfaces/Logger.hpp"
 #include "Impl/ImGui/imgui_iface.hpp"
+#include "Impl/Console/config.hpp"
 
 SG_NAMESPACE_BEGIN;
 
@@ -177,8 +178,9 @@ void DLLManager::UnloadPlugin_Internal(PluginContext* context)
 		[this, pl = context->GetPlugin()](auto& it)
 	{
 		return it.second.Plugin == pl;
-	}
-	);
+	});
+
+	SG::console_manager.RemoveCommands(context->GetPlugin());
 
 	std::erase_if(
 		m_Plugins,
@@ -238,7 +240,9 @@ void DLLManager::UnloadAllDLLs()
 		}
 	);
 
+	SG::console_manager.RemoveCommands();
 	m_Plugins.clear();
+
 	SG::logger.EndLogs();
 }
 

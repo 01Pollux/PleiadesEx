@@ -165,6 +165,18 @@
     <ClCompile Include="Impl\ImGui\Render\Console\Console.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Impl\ImGui\Render\Console\Commands\help.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\ImGui\Render\Console\Commands\clear.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\ImGui\Render\Console\Commands\find.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Impl\ImGui\Render\Console\Commands\exec.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Impl\Library\LibrarySys.hpp">

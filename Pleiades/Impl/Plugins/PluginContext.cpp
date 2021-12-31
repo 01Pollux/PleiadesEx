@@ -6,6 +6,7 @@
 #include <shadowgarden/users/String.hpp>
 
 #include "Impl/Library/LibrarySys.hpp"
+#include "Impl/Console/config.hpp"
 #include "PluginContext.hpp"
 
 SG_NAMESPACE_BEGIN;
@@ -151,33 +152,60 @@ PluginContext::PluginContext(fs::path& root_path, const std::string& cur_name, c
 	pl->m_FileName = cur_name;
 }
 
-std::filesystem::path PluginContext::GetConfigPath()
+std::filesystem::path PluginContext::AutoExecConfigPath() const noexcept
 {
-	const std::string& name = this->GetFileName();
-	return std::format("{0}/{1}/{1}.config.json", LibraryManager::PluginsDir, name);
-}
-
-nlohmann::json PluginContext::OpenConfig()
-{
-	std::ifstream file(GetConfigPath());
-	return nlohmann::json::parse(file, nullptr, true, true);
+	return std::format("{}/{}.autoexec", LibraryManager::ConfigDir, this->GetFileName());
 }
 
 void PluginContext::LoadConfig()
 {
-	nlohmann::json cfg = OpenConfig();
-	std::ifstream file(GetConfigPath());
-	file >> cfg;
-	m_Plugin->OnReloadConfig(cfg[PluginContext::VarsSection]);
+	std::ifstream file(AutoExecConfigPath());
+	if (file)
+	{
+		std::string line, cmds;
+		while (std::getline(file, line))
+		{
+			auto iter = line.begin(), end = line.end();
+			bool is_comment = false;
+
+			while (iter != end)
+			{
+				if (*iter == ' ')
+				{
+					++iter;
+					continue;
+				}
+				else if (*iter == '#')
+					is_comment = true;
+				break;
+			}
+
+			if (is_comment)
+				continue;
+
+			cmds += std::move(line) + ';';
+		}
+		if (!cmds.empty())
+			SG::console_manager.Execute(cmds);
+	}
 }
 
 void PluginContext::SaveConfig()
 {
-	nlohmann::json cfg = OpenConfig();
-	m_Plugin->OnSaveConfig(cfg[PluginContext::VarsSection]);
-	std::ofstream file(GetConfigPath());
-	file.width(2);
-	file << cfg;
+	std::vector<IPlugin::FileConfigs> configs;
+	m_Plugin->OnSaveConfig(configs);
+	if (!configs.empty())
+	{
+		std::ofstream file(AutoExecConfigPath());
+		for (auto& cfg : configs)
+		{
+			if (cfg.FileName.empty())
+			{
+				for (auto& cmd : cfg.Commands)
+					file << cmd.first << ' ' << cmd.second << '\n';
+			}
+		}
+	}
 }
 
 PluginContext::~PluginContext()
@@ -185,6 +213,5 @@ PluginContext::~PluginContext()
 	if (m_Plugin)
 		m_Plugin->OnPluginUnload();
 }
-
 
 SG_NAMESPACE_END;

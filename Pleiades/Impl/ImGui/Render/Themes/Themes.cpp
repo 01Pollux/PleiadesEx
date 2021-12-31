@@ -92,8 +92,7 @@ void ImGuiThemesManager::SetColors(const ImGuiTheme& theme)
 				}
 			}
 			catch (...)
-			{
-			}
+			{ }
 		}
 	}
 

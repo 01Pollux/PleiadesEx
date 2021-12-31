@@ -24,8 +24,6 @@ public:
 
 private:
 
-	bool ExecuteCommands();
-
 	std::string m_Input;
 	std::vector<LogInfo> m_Logs;
 	std::vector<std::string> m_HistoryCmds;

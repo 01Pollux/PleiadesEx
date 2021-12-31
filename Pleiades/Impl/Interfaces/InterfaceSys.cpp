@@ -53,6 +53,8 @@ bool DLLManager::BasicInit()
 	if (!SG::imgui_iface.LoadImGui(maincfg))
 		return false;
 
+	SG::ConCommand::Init(nullptr, &SG::console_manager);
+
 	auto plugins = maincfg.find("plugins");
 	if (plugins != maincfg.end() && plugins->is_array() && !plugins->empty())
 		std::thread([](nlohmann::json&& plugins) { SG::plugin_manager.LoadAllDLLs(plugins); }, std::move(*plugins)).detach();

@@ -231,6 +231,10 @@
     <ClCompile Include="Impl\ImGui\imgui.cpp" />
     <ClCompile Include="Impl\ImGui\Render\Compiled_Fonts\Arimo_Medium.cpp" />
     <ClCompile Include="Impl\ImGui\Render\Compiled_Fonts\FontAwesome900_Solid.cpp" />
+    <ClCompile Include="Impl\ImGui\Render\Console\Commands\clear.cpp" />
+    <ClCompile Include="Impl\ImGui\Render\Console\Commands\exec.cpp" />
+    <ClCompile Include="Impl\ImGui\Render\Console\Commands\help.cpp" />
+    <ClCompile Include="Impl\ImGui\Render\Console\Commands\find.cpp" />
     <ClCompile Include="Impl\ImGui\Render\Console\Console.cpp" />
     <ClCompile Include="Impl\ImGui\Render\Logger\Filter.cpp" />
     <ClCompile Include="Impl\ImGui\Render\Logger\JsInfo.cpp" />

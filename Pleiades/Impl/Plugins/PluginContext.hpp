@@ -83,9 +83,7 @@ private:
 	/// build's path to plugin's config
 	/// Plugins/'m_FileName'/'m_FileName'.config.json
 	/// </summary>
-	std::filesystem::path GetConfigPath();
-
-	nlohmann::json OpenConfig();
+	std::filesystem::path AutoExecConfigPath() const noexcept;
 
 	IPlugin*					m_Plugin{ };
 	std::unique_ptr<ILibrary>	m_PluginModule;
