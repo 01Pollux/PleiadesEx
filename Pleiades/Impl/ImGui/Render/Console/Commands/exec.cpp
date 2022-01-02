@@ -14,41 +14,44 @@ R"(
 {
 	if (args.has_val())
 	{
-		std::ifstream file(std::format("{}/{}.cfg", ILibraryManager::ConfigDir, args.get_val()));
-		if (file)
+		for (auto& config_name : args.get_val<std::vector<std::string>>())
 		{
-			std::string line, cmds;
-			while (std::getline(file, line))
+			std::ifstream file(std::format("{}/{}.cfg", ILibraryManager::ConfigDir, std::move(config_name)));
+			if (file)
 			{
-				auto iter = line.begin(), end = line.end();
-				bool is_comment = false;
-
-				while (iter != end)
+				std::string line, cmds;
+				while (std::getline(file, line))
 				{
-					if (*iter == ' ')
+					auto iter = line.begin(), end = line.end();
+					bool is_comment = false;
+
+					while (iter != end)
 					{
-						++iter;
-						continue;
+						if (*iter == ' ')
+						{
+							++iter;
+							continue;
+						}
+						else if (*iter == '#')
+							is_comment = true;
+						break;
 					}
-					else if (*iter == '#')
-						is_comment = true;
-					break;
+
+					if (is_comment)
+						continue;
+
+					cmds += std::move(line) + ';';
 				}
-
-				if (is_comment)
-					continue;
-
-				cmds += std::move(line) + ';';
+				if (!cmds.empty())
+					SG::console_manager.Execute(cmds);
 			}
-			if (!cmds.empty())
-				SG::console_manager.Execute(cmds);
-		}
-		else
-		{
-			SG::console_manager.Print(
-				255 | 120 << 0x8 | 120 << 0x10 | 255 << 0x18,
-				std::format("Config '{}' doesn't exists.", args.get_val())
-			);
+			else
+			{
+				SG::console_manager.Print(
+					255 | 120 << 0x8 | 120 << 0x10 | 255 << 0x18,
+					std::format("Config '{}' doesn't exists.", args.get_val())
+				);
+			}
 		}
 	}
 	return nullptr;

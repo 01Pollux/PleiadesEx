@@ -16,12 +16,12 @@ ImGuiInterface imgui_iface;
 
 bool ImGuiInterface::InitializeWindow(const nlohmann::json& config)
 {
-	m_CurWindow = FindWindowA(m_ProcWindowName->c_str(), nullptr);
+	m_CurWindow = FindWindow(m_ProcWindowName.c_str(), nullptr);
 	if (!m_CurWindow)
 	{
 		SG_LOG_FATAL(
 			SG_MESSAGE("Failed to find window by class name"),
-			SG_LOGARG("Classname", m_ProcWindowName.get())
+			SG_LOGARG("Classname", m_ProcWindowName)
 		);
 		return false;
 	}
@@ -39,7 +39,7 @@ bool ImGuiInterface::InitializeWindow(const nlohmann::json& config)
 		return false;
 	}
 
-	m_OldProc = std::bit_cast<WNDPROC>(SetWindowLongPtrA(m_CurWindow, GWLP_WNDPROC, std::bit_cast<LONG>(&WinProcCallback)));
+	m_OldProc = std::bit_cast<WNDPROC>(SetWindowLongPtr(m_CurWindow, GWLP_WNDPROC, std::bit_cast<LONG>(&WinProcCallback)));
 	ImGui_ImplWin32_Init(m_CurWindow);
 
 	LoadFonts();

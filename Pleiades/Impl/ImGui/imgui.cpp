@@ -12,10 +12,11 @@ bool ImGuiInterface::LoadImGui(const nlohmann::json& cfg)
 	if (windows == cfg.end())
 		return false;
 
-	m_ProcWindowName.set_key(SG::lib_manager.GetHostName().c_str());
+	auto cur_proc = windows->find(SG::lib_manager.GetHostName());
+	if (cur_proc == windows->end())
+		return false;
 
-	m_ProcWindowName.from_json(*windows);
-	if (m_ProcWindowName->empty())
+	if ((m_ProcWindowName = *cur_proc).empty())
 		return false;
 
 	m_Renderer.ThemeManager.ReloadThemes();

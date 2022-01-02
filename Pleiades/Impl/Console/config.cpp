@@ -9,8 +9,6 @@ ConsoleManager console_manager;
 bool ConsoleManager::AddCommands(ConCommand* command)
 {
 	IPlugin* plugin = command->plugin();
-	if (plugin && !SG::plugin_manager.FindContext(plugin))
-		return false;
 
 	ConCommand* cmd = command;
 	while (cmd)
@@ -100,153 +98,97 @@ std::vector<ConCommand*> ConsoleManager::FindCommands(const std::string_view& na
 
 void ConsoleManager::Execute(const std::string_view& cmds)
 {
-    auto commands = [&str = cmds]()
-    {
-        auto iter = str.begin(), end = str.end(), last_begin = iter;
-        std::vector<std::string_view> strs;
-
-        while (iter != end)
+	try
+	{
+        auto commands = [&str = cmds]()
         {
-            while (iter != end && (*iter == ' ' || *iter == ';'))
-                ++last_begin, ++iter;
-
-            if (iter == end)
-                break;
-
-            enum class ParseState : char { None, SkipNext, InQuote, EndOfCmd } state = ParseState::None;
+            auto iter = str.begin(), end = str.end(), last_begin = iter;
+            std::vector<std::string_view> strs;
 
             while (iter != end)
             {
-                if (state == ParseState::SkipNext)
-                {
-                    state = ParseState::None;
-                    ++iter;
-                    continue;
-                }
+                while (iter != end && (*iter == ' ' || *iter == ';'))
+                    ++last_begin, ++iter;
 
-                switch (*iter)
-                {
-                case '\\':
-                {
-                    state = ParseState::SkipNext;
+                if (iter == end)
                     break;
-                }
-                case '"':
-                {
-                    state = state == ParseState::InQuote ? ParseState::None : ParseState::InQuote;
-                    break;
-                }
-                case ';':
-                {
-                    if (state != ParseState::InQuote)
-                        state = ParseState::EndOfCmd;
-                    break;
-                }
-                }
 
-                if (++iter == end || state == ParseState::EndOfCmd)
-                {
-                    auto last_end = iter - 1;
-                    while (last_end != last_begin && *last_end == ';')
-                        --last_end;
-                    strs.emplace_back(last_begin, last_end + 1);
-
-                    if (iter != end)
-                        last_begin = iter;
-                    break;
-                }
-            }
-        }
-
-        return strs;
-    }();
-
-    for (const auto& cmd : commands)
-    {
-        auto [pCmd, cmd_name, cmd_val, cmd_args] =
-            [cmd]()
-        {
-            std::string_view cmd_val;
-            std::vector<std::pair<std::string_view, std::string_view>> args;
-
-            auto iter = cmd.begin(), end = cmd.cend(), last_begin = iter;
-
-            // seek first white and set [begin, cur( as cmd_name
-            while (iter != end && *iter != ' ')
-                ++iter;
-
-            std::string_view cmd_name = { last_begin, iter };
-            ConCommand* pCmd = SG::console_manager.FindCommand(cmd_name);
-
-            // there is more than command name, fetch them
-            if (pCmd && iter != end)
-            {
-                auto advance_arg = [end](std::string_view::const_iterator& last_begin) -> std::string_view::const_iterator
-                {
-                    while (last_begin != end && *last_begin == ' ')
-                        ++last_begin;
-
-                    auto iter = last_begin;
-                    enum class ParseState : char { None, SkipNext, InQuote, EndOfCmd } state = ParseState::None;
-
-                    while (iter != end)
-                    {
-                        if (state == ParseState::SkipNext)
-                        {
-                            state = ParseState::None;
-                            ++iter;
-                            continue;
-                        }
-
-                        switch (*iter)
-                        {
-                        case '\\':
-                        {
-                            state = ParseState::SkipNext;
-                            break;
-                        }
-                        case '"':
-                        {
-                            state = state == ParseState::InQuote ? ParseState::None : ParseState::InQuote;
-                            break;
-                        }
-                        case ' ':
-                        {
-                            if (state != ParseState::InQuote)
-                                state = ParseState::EndOfCmd;
-                            break;
-                        }
-                        }
-
-                        if (state == ParseState::EndOfCmd)
-                        {
-                            return iter;
-                        }
-                        else ++iter;
-                    }
-
-                    return end;
-                };
+                enum class ParseState : char { None, SkipNext, InQuote, EndOfCmd } state = ParseState::None;
 
                 while (iter != end)
                 {
-                    while (iter != end && *iter == ' ')
-                        ++iter;
-
-                    if (iter == end)
-                        break;
-
-                    // seek arg, starts with '-'
-                    if (*iter == '-')
+                    if (state == ParseState::SkipNext)
                     {
-                        last_begin = iter + 1;
-                        while (iter != end && (*iter != ' ' && *iter != ':'))
-                            ++iter;
+                        state = ParseState::None;
+                        ++iter;
+                        continue;
+                    }
 
-                        std::string_view  arg_name{ last_begin, iter++ };
-                        last_begin = iter;
+                    switch (*iter)
+                    {
+                    case '\\':
+                    {
+                        state = ParseState::SkipNext;
+                        break;
+                    }
+                    case '"':
+                    {
+                        state = state == ParseState::InQuote ? ParseState::None : ParseState::InQuote;
+                        break;
+                    }
+                    case ';':
+                    {
+                        if (state != ParseState::InQuote)
+                            state = ParseState::EndOfCmd;
+                        break;
+                    }
+                    }
 
+                    if (++iter == end || state == ParseState::EndOfCmd)
+                    {
+                        auto last_end = iter - 1;
+                        while (last_end != last_begin && *last_end == ';')
+                            --last_end;
+                        strs.emplace_back(last_begin, last_end + 1);
+
+                        if (iter != end)
+                            last_begin = iter;
+                        break;
+                    }
+                }
+            }
+
+            return strs;
+        }();
+
+        for (const auto& cmd : commands)
+        {
+            auto [pCmd, cmd_name, cmd_val, cmd_args] =
+                [cmd]()
+            {
+                std::string_view cmd_val;
+                std::vector<std::pair<std::string_view, std::string_view>> args;
+
+                auto iter = cmd.begin(), end = cmd.cend(), last_begin = iter;
+
+                // seek first white and set [begin, cur( as cmd_name
+                while (iter != end && *iter != ' ')
+                    ++iter;
+
+                std::string_view cmd_name = { last_begin, iter };
+                ConCommand* pCmd = SG::console_manager.FindCommand(cmd_name);
+
+                // there is more than command name, fetch them
+                if (pCmd && iter != end)
+                {
+                    auto advance_arg = [end](std::string_view::const_iterator& last_begin) -> std::string_view::const_iterator
+                    {
+                        while (last_begin != end && *last_begin == ' ')
+                            ++last_begin;
+
+                        auto iter = last_begin;
                         enum class ParseState : char { None, SkipNext, InQuote, EndOfCmd } state = ParseState::None;
+
                         while (iter != end)
                         {
                             if (state == ParseState::SkipNext)
@@ -269,7 +211,6 @@ void ConsoleManager::Execute(const std::string_view& cmds)
                                 break;
                             }
                             case ' ':
-                            case '-':
                             {
                                 if (state != ParseState::InQuote)
                                     state = ParseState::EndOfCmd;
@@ -278,60 +219,140 @@ void ConsoleManager::Execute(const std::string_view& cmds)
                             }
 
                             if (state == ParseState::EndOfCmd)
-                                break;
+                            {
+                                return iter;
+                            }
                             else ++iter;
                         }
 
-                        if (last_begin != end && *last_begin == '\"')
-                            ++last_begin;
-                        auto tmp_iter = iter - 1;
-                        if (tmp_iter > last_begin && *tmp_iter == '\"')
-                            --tmp_iter;
+                        return end;
+                    };
 
-                        std::string_view  arg_val{ last_begin, tmp_iter };
-                        args.emplace_back(
-                            arg_name,
-                            arg_val
-                        );
+                    while (iter != end)
+                    {
+                        while (iter != end && *iter == ' ')
+                            ++iter;
 
                         if (iter == end)
                             break;
+
+                        // seek arg, starts with '-'
+                        if (*iter == '-')
+                        {
+                            last_begin = iter + 1;
+                            while (iter != end && (*iter != ' ' && *iter != ':'))
+                                ++iter;
+
+                            std::string_view  arg_name{ last_begin, iter };
+                            if (iter == end)
+                            {
+                                args.emplace_back(arg_name, "");
+                                break;
+                            }
+
+                            last_begin = ++iter;
+
+                            enum class ParseState : char { None, SkipNext, InQuote, EndOfCmd } state = ParseState::None;
+                            while (iter != end)
+                            {
+                                if (state == ParseState::SkipNext)
+                                {
+                                    state = ParseState::None;
+                                    ++iter;
+                                    continue;
+                                }
+
+                                switch (*iter)
+                                {
+                                case '\\':
+                                {
+                                    state = ParseState::SkipNext;
+                                    break;
+                                }
+                                case '"':
+                                {
+                                    state = state == ParseState::InQuote ? ParseState::None : ParseState::InQuote;
+                                    break;
+                                }
+                                case ' ':
+                                case '-':
+                                {
+                                    if (state != ParseState::InQuote)
+                                        state = ParseState::EndOfCmd;
+                                    break;
+                                }
+                                }
+
+                                if (state == ParseState::EndOfCmd)
+                                    break;
+                                else ++iter;
+                            }
+
+                            if (last_begin != end && *last_begin == '\"')
+                                ++last_begin;
+                            auto tmp_iter = iter - 1;
+                            if (tmp_iter > last_begin && *tmp_iter == '\"')
+                                --tmp_iter;
+
+                            std::string_view  arg_val{ last_begin, tmp_iter };
+                            args.emplace_back(
+                                arg_name,
+                                arg_val
+                            );
+
+                            if (iter == end)
+                                break;
+                        }
+                        else if (*iter != ' ')
+                        {
+                            cmd_val = { iter, end };
+                            break;
+                        }
+                        ++iter;
                     }
-                    else if (*iter != ' ')
-                    {
-                        cmd_val = { iter, end };
-                        break;
-                    }
-                    ++iter;
                 }
-            }
 
-            return std::tuple{ pCmd, cmd_name, cmd_val, args };
-        }();
+                return std::tuple{ pCmd, cmd_name, cmd_val, args };
+            }();
 
-        if (!pCmd)
-        {
-            constexpr uint32_t red_clr = 255 | 120 << 0x8 | 120 << 0x10 | 255 << 0x18;
-            this->Print(
-                red_clr,
-                std::format("Command '{}' is not a command nor a convar.", cmd_name)
-            );
-        }
-        else
-        {
-            const char* callback_str = pCmd->exec_callback()(
-                pCmd,
-                { std::move(cmd_args), cmd_val }
-            );
-            if (callback_str)
+            if (!pCmd)
             {
                 constexpr uint32_t red_clr = 255 | 120 << 0x8 | 120 << 0x10 | 255 << 0x18;
                 this->Print(
                     red_clr,
-                    callback_str
+                    std::format("Command '{}' is not a command nor a convar.", cmd_name)
                 );
             }
+            else
+            {
+                const char* callback_str = pCmd->exec_callback()(
+                    pCmd,
+                    { std::move(cmd_args), cmd_val }
+                );
+                if (callback_str)
+                {
+                    constexpr uint32_t red_clr = 255 | 120 << 0x8 | 120 << 0x10 | 255 << 0x18;
+                    this->Print(
+                        red_clr,
+                        callback_str
+                    );
+                }
+            }
         }
+	}
+    catch (const std::exception& ex)
+    {
+        constexpr uint32_t red_clr = 255 | 120 << 0x8 | 120 << 0x10 | 255 << 0x18;
+        this->Print(
+            red_clr,
+            std::format(
+R"(Exception reported while parsing command.
+Command: {}.
+Exception: {}.)",
+            cmds,
+            ex.what()
+            )
+        );
     }
 }
 

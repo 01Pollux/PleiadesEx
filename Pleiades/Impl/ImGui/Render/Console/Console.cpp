@@ -1,12 +1,5 @@
-
-#include <filesystem>
-#include <fstream>
-
 #include "Console.hpp"
 #include <imgui/imgui_stdlib.h>
-
-#include <numeric>
-#include <regex>
 
 SG_NAMESPACE_BEGIN;
 
@@ -66,7 +59,7 @@ void ImGui_Console::Render()
         }
 
         const float footer_height_to_reserve = ImGui::GetFrameHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y * 1.25f;
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1));
         if (ImGui::BeginChild("ScrollRegion", ImVec2(0, -footer_height_to_reserve), false, ImGuiWindowFlags_HorizontalScrollbar))
         {
             if (ImGui::BeginPopupContextWindow())

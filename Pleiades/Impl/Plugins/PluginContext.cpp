@@ -203,6 +203,14 @@ void PluginContext::SaveConfig()
 			{
 				for (auto& cmd : cfg.Commands)
 					file << cmd.first << ' ' << cmd.second << '\n';
+				file << '\n';
+			}
+			else
+			{
+				std::ofstream other_cfg{ std::format("{}/{}.cfg", LibraryManager::ConfigDir, cfg.FileName) };
+				for (auto& cmd : cfg.Commands)
+					other_cfg << cmd.first << ' ' << cmd.second << '\n';
+				file << "exec " << cfg.FileName << ".cfg\n\n";
 			}
 		}
 	}

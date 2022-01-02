@@ -55,7 +55,7 @@ public:
 	/// </summary>
 	auto& GetPropManager() noexcept { return m_Renderer.PropManager; }
 
-	const std::string_view GetWindowName() const noexcept { return m_ProcWindowName.key(); }
+	const std::string_view GetWindowName() const noexcept { return m_ProcWindowName; }
 
 private:
 	/// <summary>
@@ -91,7 +91,7 @@ private:
 	ImGuiContext*			 m_ImGuiContext{ };
 	SG::ImGui_BrdigeRenderer m_Renderer;
 	
-	SG::Config<std::string> m_ProcWindowName;
+	std::string				 m_ProcWindowName;
 	
 	struct FontAndRanges
 	{

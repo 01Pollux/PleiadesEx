@@ -5,41 +5,14 @@
 
 SG_NAMESPACE_BEGIN;
 
-struct Boolcx
-{
-public:
-	bool v{ };
-	float X{ };
-
-	static auto from_string(const std::string_view& value)
-	{
-		auto vals = CommandParser<std::string_view>::split(value);
-		Boolcx bc;
-
-		if (vals.size())
-		{
-			bc.v = CommandParser<bool>::from_string(vals[0]);
-			bc.X = CommandParser<float>::from_string(vals[1]);
-		}
-		return bc;
-	}
-
-	std::string to_string() const
-	{
-		return std::format("[{}, {}]", v, X);
-	}
-};
-
-ConVar<Boolcx> zzzzzzzz{ "my_var_something", Boolcx{ true, 2.0 }, "des" };
-
 SG_COMMAND(
 	find,
 R"(
 	Clear console output.
 	USAGE:
-		] find [flags] <files, ...>
+		] find [flags] [files, ...]
 	
-	-c <count=0>:	Number of entries to print out.
+	-n <count=0>:	Number of entries to print out.
 	-r:				Use regular expression.
 	-c:				Search for commands.
 	-v:				Search for convars.
@@ -50,11 +23,14 @@ R"(
 )"
 )
 {
-	size_t count = args.get_arg("c", 0);
-	auto vals = CommandParser<std::string_view>::split(args.get_val("<,>"));
+	size_t count = args.get_arg("n", 0);
+	auto vals = args.get_val<std::vector<std::string>>();
 
 	auto cmds = SG::console_manager.FindCommands("");
 	std::set<ConCommand*> found_cmds;
+
+	bool allow_cvars = args.contains("c");
+	bool allow_cmds = args.contains("v");
 
 	if (args.contains("r"))
 	{
@@ -63,10 +39,20 @@ R"(
 			std::vector<std::regex> regs;
 			regs.reserve(vals.size());
 			for (auto& val : vals)
-				regs.emplace_back(val.data(), val.size());
+				regs.emplace_back(val.c_str(), val.size());
 
 			for (auto cmd : cmds)
 			{
+				if (cmd->is_command())
+				{
+					if (!allow_cmds)
+						continue;
+				}
+				else
+				{
+					if (!allow_cvars)
+						continue;
+				}
 				for (auto& reg : regs)
 				{
 					if (std::regex_search(cmd->name().begin(), cmd->name().end(), reg))
@@ -90,6 +76,16 @@ R"(
 	{
 		for (auto cmd : cmds)
 		{
+			if (cmd->is_command())
+			{
+				if (!allow_cmds)
+					continue;
+			}
+			else
+			{
+				if (!allow_cvars)
+					continue;
+			}
 			for (auto& val : vals)
 			{
 				if (cmd->name().contains(val))

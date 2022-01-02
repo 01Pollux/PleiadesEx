@@ -12,7 +12,7 @@ SG_NAMESPACE_BEGIN;
 
 Version DLLManager::GetHostVersion()
 {
-	constexpr Version hostVersion{ "1.3.0.0" };
+	constexpr Version hostVersion{ "1.4.0.0" };
 	return hostVersion;
 }
 
