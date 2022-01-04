@@ -3,7 +3,7 @@
 #include <map>
 #include "Impl/Plugins/PluginContext.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 struct InterfaceInfo
 {
@@ -50,7 +50,7 @@ private:
 
 public:
 	// Inherited via IInterfaceManager
-	bool ExposeInterface(const char* name, IInterface* iface, IPlugin* owner) override;
+	bool ExposeInterface(const std::string& name, IInterface* iface, IPlugin* owner) override;
 
 	bool RequestInterface(const std::string& iface_name, IInterface** iface) override;
 
@@ -64,7 +64,7 @@ public:
 
 	void UpdatePluginConfig(IPlugin* plugin, PlCfgLoadType loadtype) override;
 
-	Version GetHostVersion() override;
+	px::version GetHostVersion() override;
 
 	IPlugin* LoadPlugin(const std::string& name) override;
 
@@ -81,4 +81,4 @@ private:
 
 extern DLLManager plugin_manager;
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

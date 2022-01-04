@@ -5,7 +5,7 @@
 #include "EventManager.hpp"
 
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 EventManager event_manager;
 
 struct EventCallbackWrapper
@@ -68,4 +68,4 @@ void EventManager::ExecuteEvent(const char* event_name, EventData* data)
 	}
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

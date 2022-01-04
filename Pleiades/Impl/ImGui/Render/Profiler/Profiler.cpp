@@ -1,7 +1,7 @@
 #include "Profiler.hpp"
 #include "ImPlot/implot.h"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 void ImGui_BrdigeRenderer::RenderProfiler()
 {
@@ -23,7 +23,7 @@ void ImGui_BrdigeRenderer::RenderProfiler()
 
 ImGuiPlProfiler::ImGuiPlProfiler()
 {
-    m_ProfilerInstance.m_Instance = Profiler::Manager::Get();
+    m_ProfilerInstance.m_Instance = profiler::manager::Get();
 }
 
 void ImGuiPlProfiler::RenderSpace()
@@ -63,4 +63,4 @@ void ImGuiPlProfiler::RenderSpace()
     }
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

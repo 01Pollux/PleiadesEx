@@ -1,12 +1,12 @@
 #include "HooksManager.hpp"
 
-#include <shadowgarden/interfaces/PluginSys.hpp>
+#include <px/interfaces/PluginSys.hpp>
 
 #include "Impl/Library/GameData.hpp"
 #include "Impl/Interfaces/Logger.hpp"
 
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 DetoursManager detour_manager;
 
@@ -17,9 +17,9 @@ IHookInstance* DetoursManager::LoadHook(const std::vector<std::string>& keys, co
 
 	if (res.empty())
 	{
-		SG_LOG_ERROR(
-			SG_MESSAGE("Tried loading an non-existing detour."),
-			SG_LOGARG("Detour", hookName)
+		PX_LOG_ERROR(
+			PX_MESSAGE("Tried loading an non-existing detour."),
+			PX_LOGARG("Detour", hookName)
 		);
 		return nullptr;
 	}
@@ -93,9 +93,9 @@ IHookInstance* DetoursManager::LoadHook(const std::vector<std::string>& keys, co
 
 	if (!pAddr)
 	{
-		SG_LOG_ERROR(
-			SG_MESSAGE("Failed to get address of detour."),
-			SG_LOGARG("Detour", hookName)
+		PX_LOG_ERROR(
+			PX_MESSAGE("Failed to get address of detour."),
+			PX_LOGARG("Detour", hookName)
 		);
 		return nullptr;
 	}
@@ -119,10 +119,10 @@ IHookInstance* DetoursManager::LoadHook(const std::vector<std::string>& keys, co
 	catch (const std::exception& ex)
 	{
 		hookInst = nullptr;
-		SG_LOG_ERROR(
-			SG_MESSAGE("Exception reported while loading hook."),
-			SG_LOGARG("Detour", hookName),
-			SG_LOGARG("Exception", ex.what())
+		PX_LOG_ERROR(
+			PX_MESSAGE("Exception reported while loading hook."),
+			PX_LOGARG("Detour", hookName),
+			PX_LOGARG("Exception", ex.what())
 		);
 	}
 
@@ -139,4 +139,4 @@ void DetoursManager::ReleaseHook(IHookInstance*& hookInst)
 		m_ActiveHooks.erase(pInst->m_AddressInMemory);
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

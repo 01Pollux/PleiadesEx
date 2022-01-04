@@ -1,8 +1,8 @@
 #pragma once
 
-#include <shadowgarden/config.hpp>
+#include <px/console.hpp>
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 class ConsoleManager : public IConsoleManager
 {
@@ -49,4 +49,4 @@ public:
 };
 extern ConsoleManager console_manager;
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

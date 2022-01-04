@@ -1,7 +1,7 @@
 #pragma once
 
 #include <boost/system.hpp>
-#include <shadowgarden/defines.hpp>
+#include <px/defines.hpp>
 
 #if BOOST_WINDOWS
 #define WIN32_MEAN_AND_LEAN
@@ -9,7 +9,7 @@
 #include "MSDetour/detours.hpp"
 
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 class Detour
 {
@@ -82,7 +82,7 @@ private:
 	bool  m_IsSet = false;
 };
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();
 
 #else
 #pragma error("Detour class not implemenetd outside of Window's platform")

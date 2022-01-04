@@ -5,7 +5,7 @@
 #include "Impl/Library/LibrarySys.hpp"
 
 
-namespace ShadowGarden::DetourDetail
+namespace px::DetourDetail
 {
 	TypeTable::TypeTable()
 	{
@@ -15,8 +15,8 @@ namespace ShadowGarden::DetourDetail
 
 		if (m_TypeInfos.is_discarded())
 		{
-			SG_LOG_ERROR(
-				SG_MESSAGE("Failed to load 'Pleiades.jit_types' file")
+			PX_LOG_ERROR(
+				PX_MESSAGE("Failed to load 'Pleiades.jit_types' file")
 			);
 		}
 	}

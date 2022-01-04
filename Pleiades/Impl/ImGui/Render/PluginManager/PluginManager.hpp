@@ -4,7 +4,7 @@
 #include "../../imgui_iface.hpp"
 #include "Impl/Plugins/PluginManager.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 enum class PluginState : char8_t
 {
@@ -52,7 +52,7 @@ class ImGui_PluginManager
 public:
 	ImGui_PluginManager(const std::string_view& host_name) :
 		HostName(host_name),
-		HostVer(SG::plugin_manager.GetHostVersion())
+		HostVer(px::plugin_manager.GetHostVersion())
 	{
 		LoadPlugins();
 	}
@@ -68,7 +68,7 @@ public:
 	void DrawPluginDesign();
 
 	const std::string_view HostName;
-	const Version HostVer;
+	const px::version HostVer;
 
 private:
 	ImGuiPlManSection m_PlManSection;
@@ -88,4 +88,4 @@ constexpr const char* PlStateToString(PluginState state)
 	}
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

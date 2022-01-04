@@ -4,7 +4,7 @@
 #include "Impl/Plugins/PluginManager.hpp"
 #include "imgui_iface.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 bool ImGuiInterface::LoadImGui(const nlohmann::json& cfg)
 {
@@ -12,7 +12,7 @@ bool ImGuiInterface::LoadImGui(const nlohmann::json& cfg)
 	if (windows == cfg.end())
 		return false;
 
-	auto cur_proc = windows->find(SG::lib_manager.GetHostName());
+	auto cur_proc = windows->find(px::lib_manager.GetHostName());
 	if (cur_proc == windows->end())
 		return false;
 
@@ -42,4 +42,4 @@ void ImGuiInterface::SaveImGui(nlohmann::json& cfg)
 	m_Renderer.SaveTabs(cfg["tabs"]);
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

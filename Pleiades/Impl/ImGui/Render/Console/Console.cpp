@@ -1,7 +1,7 @@
 #include "Console.hpp"
 #include <imgui/imgui_stdlib.h>
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 ImGui_Console imgui_console;
 
@@ -102,12 +102,12 @@ void ImGui_Console::Render()
             scroll_to_bottom = true;
 
             constexpr uint32_t white_clr = 255 | 255 << 0x8 | 255 << 0x10 | 255 << 0x18;
-            SG::console_manager.Print(white_clr, "] " + this->m_Input);
+            px::console_manager.Print(white_clr, "] " + this->m_Input);
 
             this->m_HistoryCmds.emplace_back(this->m_Input);
             imgui_console.m_HistoryPos = -1;
 
-            SG::console_manager.Execute(this->m_Input);
+            px::console_manager.Execute(this->m_Input);
             this->m_Input.clear();
         }
         ImGui::PopItemWidth();
@@ -121,4 +121,4 @@ void ImGui_Console::Render()
 }
 
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

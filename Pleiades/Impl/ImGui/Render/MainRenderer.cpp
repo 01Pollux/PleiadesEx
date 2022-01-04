@@ -2,7 +2,7 @@
 #include "Impl/Plugins/PluginManager.hpp"
 #include "render.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 bool ImGui_BrdigeRenderer::RenderAll()
 {
@@ -121,7 +121,7 @@ void ImGui_BrdigeRenderer::RenderAbout()
 	ImGui::Separator();
 	ImGui::NewLine();
 	{
-		SG::Version ver = SG::plugin_manager.GetHostVersion();
+		px::version ver = px::plugin_manager.GetHostVersion();
 		ImGui::Text("Pleiades Interface: %i.%i.%i.%i", ver.major(), ver.minor(), ver.build(), ver.revision());
 		ImGui::Separator();
 		ImGui::Text("By 01Pollux/WhiteFalcon.");
@@ -162,4 +162,4 @@ void ImGui_BrdigeRenderer::SaveTabs(nlohmann::json& out_config)
 	out_config = serialized_tabs;
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

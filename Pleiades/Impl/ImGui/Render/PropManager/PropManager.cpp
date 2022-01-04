@@ -1,7 +1,7 @@
 #include "Impl/Plugins/PluginManager.hpp"
 #include "../../Render/render.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 void ImGui_BrdigeRenderer::CallbackState::RenderInfo(PropManager_t& prop_manager)
 {
@@ -10,7 +10,7 @@ void ImGui_BrdigeRenderer::CallbackState::RenderInfo(PropManager_t& prop_manager
 	// Only save when we actually change something
 	if (ImGui::Button(ICON_FA_SAVE " Save", size) && this->_Changed)
 	{
-		SG::plugin_manager.UpdatePluginConfig(this->Plugin, PlCfgLoadType::Save);
+		px::plugin_manager.UpdatePluginConfig(this->Plugin, PlCfgLoadType::Save);
 
 		for (auto& [key, info] : prop_manager.CallbackProps)
 			if (info.Plugin == this->Plugin)
@@ -21,7 +21,7 @@ void ImGui_BrdigeRenderer::CallbackState::RenderInfo(PropManager_t& prop_manager
 	// Load/Reload if the user changed something in config
 	if (ImGui::Button(ICON_FA_ARROW_CIRCLE_DOWN " Load", size))
 	{
-		SG::plugin_manager.UpdatePluginConfig(this->Plugin, PlCfgLoadType::Load);
+		px::plugin_manager.UpdatePluginConfig(this->Plugin, PlCfgLoadType::Load);
 		
 		for (auto& [key, info] : prop_manager.CallbackProps)
 			if (info.Plugin == this->Plugin)
@@ -58,7 +58,7 @@ void ImGui_BrdigeRenderer::CallbackState::RenderInfo(PropManager_t& prop_manager
 			ImGui::Text(ICON_FA_INFO_CIRCLE " Version");
 
 			ImGui::TableNextColumn();
-			Version ver = pInfo->m_Version;
+			px::version ver = pInfo->m_Version;
 			ImGui::Text("%i.%i.%i.%i", PlVersionFmt(ver));
 
 			ImGui::EndTable();
@@ -94,7 +94,7 @@ bool ImGui_BrdigeRenderer::CallbackState::DisplayPopupShutown(key_type name, Pro
 		//Draw 'save' buttons
 		if (ImGui::Button("Save", { button_size, 0 }))
 		{
-			SG::plugin_manager.UpdatePluginConfig(this->Plugin, PlCfgLoadType::Save);
+			px::plugin_manager.UpdatePluginConfig(this->Plugin, PlCfgLoadType::Save);
 
 			for (auto& [key, info] : prop_manager.CallbackProps)
 			{
@@ -111,7 +111,7 @@ bool ImGui_BrdigeRenderer::CallbackState::DisplayPopupShutown(key_type name, Pro
 		{
 			for (auto& [key, info] : prop_manager.CallbackProps)
 			{
-				SG::plugin_manager.UpdatePluginConfig(info.Plugin, PlCfgLoadType::Save);
+				px::plugin_manager.UpdatePluginConfig(info.Plugin, PlCfgLoadType::Save);
 				info._Changed = false;
 				info._SafeToClose = true;
 			}
@@ -217,4 +217,4 @@ ImGui_BrdigeRenderer::container_iter ImGui_BrdigeRenderer::PropManager_t::GetFir
 	return CallbackProps.end();
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

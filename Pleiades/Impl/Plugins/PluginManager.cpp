@@ -1,9 +1,8 @@
 #include <fstream>
 #include <chrono>
 
-#include <shadowgarden/Users/Modules.hpp>
-#include <shadowgarden/Users/String.hpp>
-#include <shadowgarden/Users/Types.hpp>
+#include <px/modules.hpp>
+#include <px/string.hpp>
 
 #include "PluginManager.hpp"
 #include "Impl/Library/LibrarySys.hpp"
@@ -11,7 +10,7 @@
 #include "Impl/ImGui/imgui_iface.hpp"
 #include "Impl/Console/config.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 DLLManager plugin_manager;
 
@@ -39,9 +38,9 @@ void DLLManager::LoadAllDLLs(const nlohmann::json& plugins)
 		IPlugin* pl = ctx->GetPlugin();
 		if (!pl->OnPluginLoad(this))
 		{
-			SG_LOG_ERROR(
-				SG_MESSAGE("Failed to load Plugin, check its log file."),
-				SG_LOGARG("Name", ctx->GetFileName())
+			PX_LOG_ERROR(
+				PX_MESSAGE("Failed to load Plugin, check its log file."),
+				PX_LOGARG("Name", ctx->GetFileName())
 			);
 			return true;
 		}
@@ -62,9 +61,9 @@ void DLLManager::LoadAllDLLs(const nlohmann::json& plugins)
 			}
 			catch (const std::exception& ex)
 			{
-				SG_LOG_ERROR(
-					SG_MESSAGE("Exception reported while reading plugin's config."),
-					SG_LOGARG("Exception", ex.what())
+				PX_LOG_ERROR(
+					PX_MESSAGE("Exception reported while reading plugin's config."),
+					PX_LOGARG("Exception", ex.what())
 				);
 			}
 		}
@@ -89,10 +88,10 @@ IPlugin* DLLManager::LoadPlugin(const std::string& name)
 
 			if (!err.empty())
 			{
-				SG_LOG_ERROR(
-					SG_MESSAGE("Failed to load plugin."),
-					SG_LOGARG("Name", name),
-					SG_LOGARG("Error", err)
+				PX_LOG_ERROR(
+					PX_MESSAGE("Failed to load plugin."),
+					PX_LOGARG("Name", name),
+					PX_LOGARG("Error", err)
 				);
 				return pl;
 			}
@@ -103,9 +102,9 @@ IPlugin* DLLManager::LoadPlugin(const std::string& name)
 
 		if (!pl->OnPluginLoad(this))
 		{
-			SG_LOG_ERROR(
-				SG_MESSAGE("Failed to load plugin, check it's log file."),
-				SG_LOGARG("Name", ctx->GetFileName()),
+			PX_LOG_ERROR(
+				PX_MESSAGE("Failed to load plugin, check it's log file."),
+				PX_LOGARG("Name", ctx->GetFileName()),
 			);
 			return nullptr;
 		}
@@ -119,10 +118,10 @@ IPlugin* DLLManager::LoadPlugin(const std::string& name)
 		}
 		catch (const std::exception& ex)
 		{
-			SG_LOG_ERROR(
-				SG_MESSAGE("Error while reading plugin's config."),
-				SG_LOGARG("Name", name),
-				SG_LOGARG("Exception", ex.what()),
+			PX_LOG_ERROR(
+				PX_MESSAGE("Error while reading plugin's config."),
+				PX_LOGARG("Name", name),
+				PX_LOGARG("Exception", ex.what()),
 			);
 			return nullptr;
 		}
@@ -140,10 +139,10 @@ void DLLManager::LoadOneDLL(const std::string& proc_name, std::filesystem::path&
 	auto ctx(std::make_unique<PluginContext>(path, name, proc_name, err));
 	if (!err.empty())
 	{
-		SG_LOG_ERROR(
-			SG_MESSAGE("Failed to load plugin."),
-			SG_LOGARG("Name", name),
-			SG_LOGARG("Error", err),
+		PX_LOG_ERROR(
+			PX_MESSAGE("Failed to load plugin."),
+			PX_LOGARG("Name", name),
+			PX_LOGARG("Error", err),
 		);
 	}
 	else
@@ -153,11 +152,11 @@ void DLLManager::LoadOneDLL(const std::string& proc_name, std::filesystem::path&
 std::string DLLManager::GetProcessName()
 {
 #if BOOST_WINDOWS
-	TChar proc_path[MAX_PATH]{ };
-	DWord size = std::ssize(proc_path) - 1;
+	TCHAR proc_path[MAX_PATH]{ };
+	DWORD size = static_cast<DWORD>(std::ssize(proc_path) - 1);
 	QueryFullProcessImageName(GetCurrentProcess(), NULL, proc_path, &size);
 
-	std::string procName(proc_path, size);
+	std::basic_string<TCHAR> procName(proc_path, size);
 	return procName.substr(procName.find_last_of("\\") + 1);
 #elif BOOST_LINUX
 	extern char* program_invocation_short_name;
@@ -180,7 +179,7 @@ void DLLManager::UnloadPlugin_Internal(PluginContext* context)
 		return it.second.Plugin == pl;
 	});
 
-	SG::console_manager.RemoveCommands(context->GetPlugin());
+	px::console_manager.RemoveCommands(context->GetPlugin());
 
 	std::erase_if(
 		m_Plugins,
@@ -240,10 +239,10 @@ void DLLManager::UnloadAllDLLs()
 		}
 	);
 
-	SG::console_manager.RemoveCommands();
+	px::console_manager.RemoveCommands();
 	m_Plugins.clear();
 
-	SG::logger.EndLogs();
+	px::logger.EndLogs();
 }
 
 IPlugin* DLLManager::FindPlugin(const std::string& name)
@@ -328,4 +327,4 @@ void DLLManager::UpdatePluginConfig(IPlugin* plugin, PlCfgLoadType loadtype)
 	}
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

@@ -4,29 +4,29 @@
 #include "Impl/Interfaces/Logger.hpp"
 #include "imgui_iface.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 ImGuiContext* ImGuiInterface::GetContext() noexcept
 {
 	return m_ImGuiContext;
 }
 
-SG::ImGuiPlCallbackId ImGuiInterface::AddCallback(SG::IPlugin* plugin, const char* name, const SG::ImGuiPluginCallback& callback)
+px::ImGuiPlCallbackId ImGuiInterface::AddCallback(px::IPlugin* plugin, const char* name, const px::ImGuiPluginCallback& callback)
 {
 	auto& callbacks = m_Renderer.PropManager.CallbackProps;
 
-	SG::ImGuiPlCallbackId id = 0;
+	px::ImGuiPlCallbackId id = 0;
 	for (const auto& cb : callbacks)
 	{
 		if (cb.second.Id == id)
 			++id;
 	}
-	callbacks.emplace(name, SG::ImGui_BrdigeRenderer::CallbackState{ callback, plugin, id });
+	callbacks.emplace(name, px::ImGui_BrdigeRenderer::CallbackState{ callback, plugin, id });
 
 	return id;
 }
 
-void ImGuiInterface::RemoveCallback(const SG::ImGuiPlCallbackId id)
+void ImGuiInterface::RemoveCallback(const px::ImGuiPlCallbackId id)
 {
 	auto& prop = m_Renderer.PropManager;
 	auto iter = std::find_if(prop.CallbackProps.begin(), prop.CallbackProps.end(), [id] (const auto& it) { return it.second.Id == id; });
@@ -39,7 +39,7 @@ void ImGuiInterface::RemoveCallback(const SG::ImGuiPlCallbackId id)
 	}
 }
 
-void ImGuiInterface::RemoveCallback(const SG::IPlugin* plugin) noexcept
+void ImGuiInterface::RemoveCallback(const px::IPlugin* plugin) noexcept
 {
 	auto& prop = m_Renderer.PropManager;
 	bool should_invalidate = false;
@@ -109,7 +109,7 @@ void ImGuiInterface::LoadFonts()
 	}
 
 	char path[MAX_PATH];
-	if (SG::lib_manager.GoToDirectory(SG::PlDirType::Main, "Fonts", path, sizeof(path)))
+	if (px::lib_manager.GoToDirectory(px::PlDirType::Main, "Fonts", path, sizeof(path)))
 	{
 		std::ifstream config_file(std::string(path) + "/Fonts.json");
 		if (config_file)
@@ -252,9 +252,9 @@ void ImGuiInterface::LoadFonts()
 
 				if (!pFont)
 				{
-					SG_LOG_ERROR(
-						SG_MESSAGE("Failed to load font"),
-						SG_LOGARG("Name", font.key())
+					PX_LOG_ERROR(
+						PX_MESSAGE("Failed to load font"),
+						PX_LOGARG("Name", font.key())
 					);
 					continue;
 				}
@@ -267,4 +267,4 @@ void ImGuiInterface::LoadFonts()
 	ImGui::GetIO().Fonts->Build();
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

@@ -7,7 +7,7 @@
 #include "Impl/Interfaces/Logger.hpp"
 
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 HookInstance::HookInstance(IntPtr original_function, const nlohmann::json& data, std::string& out_err) :
 	m_AddressInMemory(original_function)
@@ -22,7 +22,7 @@ HookInstance::HookInstance(IntPtr original_function, const nlohmann::json& data,
 		if (const LONG res = m_Detour.attach(original_function.get(), callback); res)
 		{
 			if (callback)
-				SG::lib_manager.GetRuntime()->release(callback);
+				px::lib_manager.GetRuntime()->release(callback);
 
 			std::format_to(std::back_inserter(out_err), "Failed to detour the function (Code: {})", res);
 		}
@@ -39,7 +39,7 @@ HookInstance::~HookInstance() noexcept
 	if (callback)
 	{
 		m_Detour.detach();
-		SG::lib_manager.GetRuntime()->release(callback);
+		px::lib_manager.GetRuntime()->release(callback);
 	}
 }
 
@@ -48,7 +48,7 @@ void* HookInstance::AllocCallbackHandler(DetourDetail::SigBuilder& sigbuilder, s
 	using namespace asmjit;
 
 	CodeHolder code;
-	code.init(SG::lib_manager.GetRuntime()->environment());
+	code.init(px::lib_manager.GetRuntime()->environment());
 
 	x86::Compiler comp(&code);
 
@@ -90,7 +90,7 @@ void* HookInstance::AllocCallbackHandler(DetourDetail::SigBuilder& sigbuilder, s
 	}
 
 	void* fn;
-	if (const auto err = SG::lib_manager.GetRuntime()->add(&fn, &code))
+	if (const auto err = px::lib_manager.GetRuntime()->add(&fn, &code))
 	{
 		std::format_to(std::back_inserter(out_err), "Failed to add the function to JIT runtime (Code: {})", err);
 		return nullptr;
@@ -350,4 +350,4 @@ void* HookInstance::GetFunction() noexcept
 	return m_ActualFunction;
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

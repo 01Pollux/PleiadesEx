@@ -8,7 +8,7 @@
 #include "Impl/Console/config.hpp"
 #include "../render.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 class ImGui_Console
 {
@@ -34,4 +34,4 @@ private:
 
 extern ImGui_Console imgui_console;
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

@@ -1,7 +1,7 @@
 #include <format>
 #include "Logger.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 void ImGuiJsLog_HandleDrawPopups(nlohmann::json& info);
 
@@ -304,4 +304,4 @@ void ImGuiJsLog_HandleDrawPopups(nlohmann::json& info)
 
 
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

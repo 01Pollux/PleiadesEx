@@ -3,7 +3,7 @@
 #include "../render.hpp"
 #include "../../imgui_iface.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 struct ImGuiJsLogInfo
 {
@@ -77,4 +77,4 @@ private:
 	ImGuiPlLogSection m_LogSection;
 };
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

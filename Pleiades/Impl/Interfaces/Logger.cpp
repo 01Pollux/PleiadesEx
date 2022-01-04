@@ -2,15 +2,14 @@
 #include <fstream>
 #include <mutex>
 
-#include <shadowgarden/interfaces/PluginSys.hpp>
-#include <shadowgarden/users/String.hpp>
-#include <shadowgarden/users/StopWatch.hpp>
+#include <px/interfaces/PluginSys.hpp>
+#include <px/string.hpp>
+#include <px/stopWatch.hpp>
 
 #include "Logger.hpp"
 #include "Impl/Library/LibrarySys.hpp"
 
-
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 LoggerImpl logger;
 
@@ -31,14 +30,14 @@ struct LoggerImpl::InternalLoggerInfo
 {
 	std::string		FileName;
 	std::string		TimeStamp;
-	SG::PlLogType	LogType;
+	px::PlLogType	LogType;
 	LogSourceLoc	SourceLoc;
 	nlohmann::json	Info;
 
-	InternalLoggerInfo(SG::LoggerInfo&& info) noexcept;
+	InternalLoggerInfo(px::LoggerInfo&& info) noexcept;
 };
 
-LoggerImpl::InternalLoggerInfo::InternalLoggerInfo(SG::LoggerInfo&& linfo) noexcept :
+LoggerImpl::InternalLoggerInfo::InternalLoggerInfo(px::LoggerInfo&& linfo) noexcept :
 	FileName(
 		linfo.Plugin != ILogger::MainPlugin ?
 		linfo.Plugin->GetFileName() :
@@ -116,10 +115,10 @@ void LoggerImpl::WriteLogs()
 					{
 						linfo.TimeStamp,
 						{
-							SG_LOGARG("File",		std::move(linfo.SourceLoc.File)),
-							SG_LOGARG("Function",	std::move(linfo.SourceLoc.Function)),
-							SG_LOGARG("Line",		linfo.SourceLoc.Line),
-							SG_LOGARG("Info",		std::move(linfo.Info)),
+							PX_LOGARG("File",		std::move(linfo.SourceLoc.File)),
+							PX_LOGARG("Function",	std::move(linfo.SourceLoc.Function)),
+							PX_LOGARG("Line",		linfo.SourceLoc.Line),
+							PX_LOGARG("Info",		std::move(linfo.Info)),
 						}
 					}
 				}
@@ -163,4 +162,4 @@ void LoggerImpl::EndLogs()
 	if (m_LogTimer.joinable())	m_LogTimer.join();
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

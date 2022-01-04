@@ -6,7 +6,7 @@
 
 #include "TypeTable.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 class CallContext;
 namespace DetourDetail
@@ -182,4 +182,4 @@ namespace DetourDetail
 	};
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

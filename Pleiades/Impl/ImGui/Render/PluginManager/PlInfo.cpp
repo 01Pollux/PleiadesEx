@@ -1,7 +1,7 @@
 
 #include "PluginManager.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 void ImGuiPlInfo::DrawPopupState()
 {
@@ -55,7 +55,7 @@ void ImGuiPlInfo::Load()
 	if (this->State <= PluginState::Loaded)
 		return;
 
-	this->Plugin = SG::plugin_manager.LoadPlugin(this->PluginName);
+	this->Plugin = px::plugin_manager.LoadPlugin(this->PluginName);
 	this->State = this->Plugin ? (this->Plugin->IsPluginPaused() ? PluginState::Paused : PluginState::Loaded) : PluginState::Failed;
 }
 
@@ -63,8 +63,8 @@ void ImGuiPlInfo::Unload()
 {
 	if (this->Plugin)
 	{
-		SG::imgui_iface.RemoveCallback(this->Plugin);
-		SG::plugin_manager.RequestShutdown(this->Plugin);
+		px::imgui_iface.RemoveCallback(this->Plugin);
+		px::plugin_manager.RequestShutdown(this->Plugin);
 
 		this->Plugin = nullptr;
 		this->State = PluginState::Unloaded;
@@ -75,10 +75,10 @@ void ImGuiPlInfo::Reload()
 {
 	if (this->State == PluginState::Loaded)
 	{
-		SG::imgui_iface.RemoveCallback(this->Plugin);
-		SG::plugin_manager.RequestShutdown(this->Plugin);
+		px::imgui_iface.RemoveCallback(this->Plugin);
+		px::plugin_manager.RequestShutdown(this->Plugin);
 
-		if (!(this->Plugin = SG::plugin_manager.LoadPlugin(this->PluginName)))
+		if (!(this->Plugin = px::plugin_manager.LoadPlugin(this->PluginName)))
 			this->State = PluginState::Failed;
 	}
 }
@@ -106,7 +106,7 @@ void ImGuiPlInfo::PauseOrResume()
 
 void ImGuiPlInfo::DrawPluginsProps()
 {
-	auto& props = SG::imgui_iface.GetPropManager();
+	auto& props = px::imgui_iface.GetPropManager();
 	
 	if (ImGui::CollapsingHeader("Plugin Props"))
 	{
@@ -131,4 +131,4 @@ void ImGuiPlInfo::DrawPluginsProps()
 }
 
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

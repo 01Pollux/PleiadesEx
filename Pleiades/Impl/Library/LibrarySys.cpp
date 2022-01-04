@@ -14,13 +14,13 @@
 #include <dlfcn.h>
 #endif
 
-#include <shadowgarden/users/Profiler.hpp>
+#include <px/profiler.hpp>
 
 #include "LibrarySys.hpp"
 #include "GameData.hpp"
 
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 LibraryManager lib_manager;
 
@@ -312,9 +312,9 @@ std::string LibraryManager::GetLastError()
 #endif
 }
 
-Profiler::Manager* LibraryManager::GetProfiler()
+profiler::manager* LibraryManager::GetProfiler()
 {
-	return Profiler::Manager::Get();
+	return profiler::manager::Get();
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

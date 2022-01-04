@@ -2,11 +2,10 @@
 
 #include <boost/system.hpp>
 #include <asmjit/asmjit.h>
-#include <shadowgarden/interfaces/LibrarySys.hpp>
-#include <shadowgarden/users/IntPtr.hpp>
+#include <px/interfaces/LibrarySys.hpp>
+#include <px/IntPtr.hpp>
 
-
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 class LibraryImpl : public ILibrary
 {
@@ -24,7 +23,7 @@ public:
 
 	IntPtr FindBySignature(const std::string& signature) override;
 
-	IntPtr FindBySignature(const SG::ILibrary::SignaturePredicate& signature) override;
+	IntPtr FindBySignature(const px::ILibrary::SignaturePredicate& signature) override;
 
 	IntPtr FindByString(const std::string& str) override;
 
@@ -60,7 +59,7 @@ public:
 
 	std::string GetLastError() override;
 
-	Profiler::Manager* GetProfiler() override;
+	profiler::manager* GetProfiler() override;
 
 public:
 	void BuildDirectories();
@@ -74,4 +73,4 @@ private:
 
 extern LibraryManager lib_manager;
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

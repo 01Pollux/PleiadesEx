@@ -6,7 +6,7 @@
 #include "Impl/Interfaces/Logger.hpp"
 
 
-namespace ShadowGarden::DetourDetail
+namespace px::DetourDetail
 {
 	SigBuilder::SigBuilder(const nlohmann::json& sig_data, std::string& err) :
 		m_SigInfo(sig_data)

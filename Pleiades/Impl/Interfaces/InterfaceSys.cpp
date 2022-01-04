@@ -8,11 +8,11 @@
 #include "Impl/ImGui/imgui_iface.hpp"		// imgui_iface
 #include "Impl/Console/config.hpp"			// console_manager
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
-Version DLLManager::GetHostVersion()
+px::version DLLManager::GetHostVersion()
 {
-	constexpr Version hostVersion{ "1.4.0.0" };
+	constexpr px::version hostVersion{ "1.4.2.0" };
 	return hostVersion;
 }
 
@@ -47,17 +47,17 @@ bool DLLManager::BasicInit()
 
 	{
 		auto& name = maincfg["host name"];
-		SG::lib_manager.SetHostName(name.is_string() ? name : "any");
+		px::lib_manager.SetHostName(name.is_string() ? name : "any");
 	}
 
-	if (!SG::imgui_iface.LoadImGui(maincfg))
+	if (!px::imgui_iface.LoadImGui(maincfg))
 		return false;
 
-	SG::ConCommand::Init(nullptr, &SG::console_manager);
+	px::ConCommand::Init(nullptr, &px::console_manager);
 
 	auto plugins = maincfg.find("plugins");
 	if (plugins != maincfg.end() && plugins->is_array() && !plugins->empty())
-		std::thread([](nlohmann::json&& plugins) { SG::plugin_manager.LoadAllDLLs(plugins); }, std::move(*plugins)).detach();
+		std::thread([](nlohmann::json&& plugins) { px::plugin_manager.LoadAllDLLs(plugins); }, std::move(*plugins)).detach();
 
 	return true;
 }
@@ -65,13 +65,13 @@ bool DLLManager::BasicInit()
 void DLLManager::BasicShutdown()
 {
 	auto maincfg{ nlohmann::json::parse(std::ifstream(LibraryManager::MainCfg)) };
-	SG::imgui_iface.SaveImGui(maincfg);
+	px::imgui_iface.SaveImGui(maincfg);
 	std::ofstream file(LibraryManager::MainCfg);
 	file.width(2);
 	file << maincfg;
 }
 
-bool DLLManager::ExposeInterface(const char* iface_name, IInterface* iface, IPlugin* owner)
+bool DLLManager::ExposeInterface(const std::string& iface_name, IInterface* iface, IPlugin* owner)
 {
 	std::string key{ iface_name };
 
@@ -93,4 +93,4 @@ bool DLLManager::RequestInterface(const std::string& iface_name, IInterface** if
 	return true;
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

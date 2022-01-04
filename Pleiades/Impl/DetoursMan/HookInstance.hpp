@@ -3,14 +3,14 @@
 #include <set>
 #include <nlohmann/Json_Fwd.hpp>
 
-#include <shadowgarden/interfaces/HooksManager.hpp>
-#include <shadowgarden/users/IntPtr.hpp>
+#include <px/interfaces/HooksManager.hpp>
+#include <px/intptr.hpp>
 
 #include "Detour.hpp"
 #include "CallContext.hpp"
 
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 struct HookInfo
 {
@@ -73,4 +73,4 @@ private:
 	std::stack<MHookRes>	m_LastReturn;
 };
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

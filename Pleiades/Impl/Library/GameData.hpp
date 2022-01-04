@@ -3,11 +3,11 @@
 #include <optional>
 
 #include <nlohmann/Json.hpp>
-#include <shadowgarden/interfaces/GameData.hpp>
+#include <px/interfaces/GameData.hpp>
 
 #include "LibrarySys.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 	
 class GameData : public IGameData
 {
@@ -16,7 +16,7 @@ public:
 
 public:
 	// Inherited via IGameData
-	void PushFiles(std::initializer_list<const char*> files) override;
+	void PushFiles(const std::vector<std::string>& files) override;
 
 	IntPtr ReadSignature(const std::vector<std::string>& keys, const std::string& signame) override;
 
@@ -45,4 +45,4 @@ private:
 	std::vector<std::string> m_Paths;
 };
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

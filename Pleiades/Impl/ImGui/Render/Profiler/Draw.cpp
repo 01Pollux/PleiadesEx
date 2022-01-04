@@ -1,7 +1,7 @@
 
 #include "Profiler.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 void ImGuiPlProfiler::Render()
 {
@@ -98,7 +98,7 @@ void ImGuiPlProfiler::Render()
 
 
 void ImGuiPlProfiler::StackTracePopup_t::SetPopupInfo(
-    const Profiler::Types::stacktrace& stacktrace,
+    const profiler::types::stacktrace& stacktrace,
     ImGuiProfilerInstance::entry_container* entries,
     ImGuiProfilerInstance::entry_container::iterator* current_entry
 )
@@ -140,7 +140,7 @@ void ImGuiPlProfiler::StackTracePopup_t::DisplayPopupInfo()
         {
             if (ImGui::Button("Delete", space_size))
             {
-                Profiler::Manager::EraseChildrens(*m_Entries, m_CurrentEntry);
+                profiler::manager::EraseChildrens(*m_Entries, m_CurrentEntry);
                 m_StackTrace.clear();
                 ImGui::CloseCurrentPopup();
             }
@@ -157,4 +157,4 @@ void ImGuiPlProfiler::StackTracePopup_t::DisplayPopupInfo()
     }
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

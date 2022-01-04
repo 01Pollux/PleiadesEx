@@ -4,7 +4,7 @@
 #include "ImPlot/implot.h"
 #include "ImPlot/implot_internal.h"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 void ImGuiProfilerInstance::DrawPlotBars(entry_container& entries)
 {
@@ -82,7 +82,7 @@ void ImGuiProfilerInstance::DrawPlotBars(entry_container& entries)
 
                 if (ImGui::Selectable("Delete"))
                 {
-                    entry = Profiler::Manager::EraseChildrens(entries, entry);
+                    entry = profiler::manager::EraseChildrens(entries, entry);
                     ImGui::CloseCurrentPopup();
                 }
 
@@ -215,4 +215,4 @@ void ImGuiProfilerInstance::DrawPlotBars(entry_container& entries)
     }
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

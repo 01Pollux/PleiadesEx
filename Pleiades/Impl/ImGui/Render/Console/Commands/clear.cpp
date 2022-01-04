@@ -1,8 +1,8 @@
 #include "../Console.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
-SG_COMMAND(
+PX_COMMAND(
 	clear,
 R"(
 	Clear console output.
@@ -16,9 +16,9 @@ R"(
 {
 	size_t count = args.get_arg("c", 0);
 	bool history_only = args.contains("h");
-	SG::console_manager.Clear(count, history_only);
+	px::console_manager.Clear(count, history_only);
 
 	return nullptr;
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

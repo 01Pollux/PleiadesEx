@@ -1,9 +1,9 @@
 #include "../Console.hpp"
 #include "Impl/Library/LibrarySys.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
-SG_COMMAND(
+PX_COMMAND(
 	exec,
 R"(
 	Execute a config file.
@@ -43,11 +43,11 @@ R"(
 					cmds += std::move(line) + ';';
 				}
 				if (!cmds.empty())
-					SG::console_manager.Execute(cmds);
+					px::console_manager.Execute(cmds);
 			}
 			else
 			{
-				SG::console_manager.Print(
+				px::console_manager.Print(
 					255 | 120 << 0x8 | 120 << 0x10 | 255 << 0x18,
 					std::format("Config '{}' doesn't exists.", args.get_val())
 				);
@@ -57,4 +57,4 @@ R"(
 	return nullptr;
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

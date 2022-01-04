@@ -2,9 +2,9 @@
 #include "../Console.hpp"
 #include "Impl/Plugins/PluginManager.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
-SG_COMMAND(
+PX_COMMAND(
 	help,
 R"(
 	For more information about a command, type "help <command>".
@@ -21,8 +21,8 @@ R"(
 {
 		if (args.arg_size())
 		{
-			auto cmds = SG::console_manager.FindCommands("");
-			std::vector<SG::ConCommand*> final_cmds;
+			auto cmds = px::console_manager.FindCommands("");
+			std::vector<px::ConCommand*> final_cmds;
 
 			{
 				bool cmds_e_only = args.contains("ci");
@@ -55,7 +55,7 @@ R"(
 							continue;
 					}
 
-					SG::console_manager.Print(
+					px::console_manager.Print(
 						{ 255, 120, 120, 255 },
 						std::format("[{}] : {}", ++cmd_idx, cmd->name())
 					);
@@ -70,10 +70,10 @@ R"(
 			if (args.val_size())
 			{
 				auto target_cmd = args.get_val<std::string>("");
-				cmd = SG::console_manager.FindCommand(target_cmd);
+				cmd = px::console_manager.FindCommand(target_cmd);
 				if (!cmd)
 				{
-					SG::console_manager.Print(
+					px::console_manager.Print(
 						{ 255, 120, 120, 255 },
 						std::format("Command '{}' is not a command nor a convar", target_cmd)
 					);
@@ -83,7 +83,7 @@ R"(
 			else cmd = pCmd;
 
 			{
-				SG::console_manager.Print(
+				px::console_manager.Print(
 					{ 255, 255, 255, 255 },
 					std::format(
 R"(Name:	'{}'
@@ -100,4 +100,4 @@ Description:
 		}
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

@@ -1,13 +1,13 @@
 #pragma once
 
-#include <shadowgarden/users/Profiler.hpp>
+#include <px/profiler.hpp>
 #include "../../Render/render.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 struct ImGuiProfilerInstance
 {
-    using entry_container = Profiler::Types::entry_container;
+    using entry_container = profiler::types::entry_container;
 
     enum class draw_type : uint8_t
     {
@@ -20,7 +20,7 @@ struct ImGuiProfilerInstance
     /// Clear or erase section
     /// </summary>
     /// <param name="section_name">section name or empty string to clear every section</param>
-    void erase(const Profiler::Types::string_t name)
+    void erase(const std::string& name)
     {
         m_Instance->ClearSection(name);
     }
@@ -29,8 +29,8 @@ struct ImGuiProfilerInstance
     {
         struct entry_info
         {
-            const Profiler::Types::clock_duration duration;
-            const std::unique_ptr<Profiler::Types::stacktrace>& stack_info;
+            const profiler::types::clock_duration duration;
+            const std::unique_ptr<profiler::types::stacktrace>& stack_info;
         };
 
         struct entry_container
@@ -39,16 +39,16 @@ struct ImGuiProfilerInstance
             size_t count{ };
 
             std::list<entry_info> entries;
-            const Profiler::Types::string_t& name;
-            Profiler::Types::clock_duration min{ Profiler::Types::clock_duration::max() }, max{ Profiler::Types::clock_duration::min() }, avg_minmax{ }, avg_total{ };
+            const std::string& name;
+            profiler::types::clock_duration min{ profiler::types::clock_duration::max() }, max{ profiler::types::clock_duration::min() }, avg_minmax{ }, avg_total{ };
 
-            entry_container(size_t stack_offset, const Profiler::Types::string_t& name) :
+            entry_container(size_t stack_offset, const std::string& name) :
                 stack_offset(stack_offset), name(name)
             { }
         };
         using container_type = std::vector<entry_container>;
 
-        void Update(const Profiler::Types::entry_container& infos);
+        void Update(const profiler::types::entry_container& infos);
 
         void Clear() noexcept
         {
@@ -107,7 +107,7 @@ struct ImGuiProfilerInstance
         using entry_iterator = ImGuiProfilerInstance::entry_container::iterator;
         using entry_citerator = ImGuiProfilerInstance::entry_container::const_iterator;
 
-        auto FindOrEmplaceWithinOffset(size_t stack_offset, const Profiler::Types::string_t& name);
+        auto FindOrEmplaceWithinOffset(size_t stack_offset, const std::string& name);
         
         size_t InsertNestedEntries(entry_citerator cur_iter, const entry_citerator& end_iter, size_t stack_offset = 1);
         void SetElapsedTime() noexcept;
@@ -127,7 +127,7 @@ struct ImGuiProfilerInstance
     void DrawPlotBars(entry_container&);
 
 
-    Profiler::Manager* m_Instance{ };
+    profiler::manager* m_Instance{ };
     std::map<std::string, section_info> m_Sections;
     bool m_NeedReload;
 
@@ -168,7 +168,7 @@ public:
         /// <param name="entries">pointer to entries if the entry is erasable</param>
         /// <param name="current_entry">pointer to to current entry if it's erables</param>
         void SetPopupInfo(
-            const Profiler::Types::stacktrace& stacktrace,
+            const profiler::types::stacktrace& stacktrace,
             ImGuiProfilerInstance::entry_container* entries,
             ImGuiProfilerInstance::entry_container::iterator* current_entry
         );
@@ -190,4 +190,4 @@ private:
     ImGuiProfilerInstance m_ProfilerInstance;
 };
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

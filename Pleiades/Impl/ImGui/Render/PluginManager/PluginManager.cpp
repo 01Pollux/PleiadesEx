@@ -1,14 +1,14 @@
 
 #include <filesystem>
 #include <fstream>
-#include <shadowgarden/users/Version_Fmt.hpp>
+#include <px/version_fmt.hpp>
 
 #include "Impl/Library/LibrarySys.hpp"
 #include "Impl/Interfaces/Logger.hpp"
 
 #include "PluginManager.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 static void DrawPluginStateToImGui(PluginState state);
 
@@ -24,7 +24,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(
 
 void ImGui_BrdigeRenderer::RenderPluginManager()
 {
-	static ImGui_PluginManager manager(SG::imgui_iface.GetWindowName());
+	static ImGui_PluginManager manager(px::imgui_iface.GetWindowName());
 
 	ImGui::Text(ICON_FA_INFO_CIRCLE " Host Name: %s", manager.HostName.data());
 	ImGui::Text(ICON_FA_INFO_CIRCLE " Host Version: %i.%i.%i.%i", PlVersionFmt(manager.HostVer));
@@ -41,11 +41,11 @@ void ImGui_PluginManager::LoadPlugins()
 	m_PlManSection.Plugins.clear();
 
 	char path[MAX_PATH]{ };
-	if (!SG::lib_manager.GoToDirectory(SG::PlDirType::Plugins, nullptr, path, std::ssize(path)))
+	if (!px::lib_manager.GoToDirectory(px::PlDirType::Plugins, nullptr, path, std::ssize(path)))
 	{
-		SG_LOG_MESSAGE(
-			SG_MESSAGE("Exception reported while loading Packs"),
-			SG_LOGARG("Exception", path)
+		PX_LOG_MESSAGE(
+			PX_MESSAGE("Exception reported while loading Packs"),
+			PX_LOGARG("Exception", path)
 		);
 		m_PlManSection.reset();
 		return;
@@ -65,7 +65,7 @@ void ImGui_PluginManager::LoadPlugins()
 			continue;
 		}
 
-		IPlugin* pl = SG::plugin_manager.FindPlugin(file);
+		IPlugin* pl = px::plugin_manager.FindPlugin(file);
 
 		ImGuiPlInfo info{
 			std::move(file),
@@ -161,7 +161,7 @@ void ImGui_PluginManager::DrawPluginDesign()
 					if (ImGui::TableNextColumn())
 						ImGui::TextUnformatted("Version");
 					{
-						const Version& ver = plinfo.Plugin ? plinfo.Plugin->GetPluginInfo()->m_Version : Version{ };
+						const px::version& ver = plinfo.Plugin ? plinfo.Plugin->GetPluginInfo()->m_Version : px::version{ };
 
 						ImVec4 clr{
 							plinfo.State == Loaded ? ImVec4{ 0.f, 1.f, 0.f, 1.f } : // Loaded and an up to date version
@@ -205,4 +205,4 @@ void DrawPluginStateToImGui(PluginState state)
 	}
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

@@ -3,9 +3,9 @@
 #include <set>
 #include "../Console.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
-SG_COMMAND(
+PX_COMMAND(
 	find,
 R"(
 	Clear console output.
@@ -26,7 +26,7 @@ R"(
 	size_t count = args.get_arg("n", 0);
 	auto vals = args.get_val<std::vector<std::string>>();
 
-	auto cmds = SG::console_manager.FindCommands("");
+	auto cmds = px::console_manager.FindCommands("");
 	std::set<ConCommand*> found_cmds;
 
 	bool allow_cvars = args.contains("c");
@@ -65,7 +65,7 @@ R"(
 		}
 		catch (const std::exception& ex)
 		{
-			SG::console_manager.Print(
+			px::console_manager.Print(
 				{ 255, 120, 120, 255 },
 				std::format("Exception reported while matching for regular expression : \n{}", ex.what())
 			);
@@ -100,7 +100,7 @@ R"(
 	size_t cmd_idx = 0;
 	for (auto& cmd : found_cmds)
 	{
-		SG::console_manager.Print(
+		px::console_manager.Print(
 			{ 255, 255, 255, 255 },
 			std::format("[{}] : {}", ++cmd_idx, cmd->name())
 		);
@@ -109,4 +109,4 @@ R"(
 	return nullptr;
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

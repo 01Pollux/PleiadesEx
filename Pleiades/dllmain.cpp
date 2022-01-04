@@ -1,9 +1,8 @@
 #include <boost/config.hpp>
 
-#include <shadowgarden/users/Profiler.hpp>
-#include <shadowgarden/users/Modules.hpp>
-#include <shadowgarden/users/String.hpp>
-#include <shadowgarden/users/Types.hpp>
+#include <px/profiler.hpp>
+#include <px/modules.hpp>
+#include <px/string.hpp>
 
 #include "Impl/Plugins/PluginManager.hpp"
 #include "Impl/Library/LibrarySys.hpp"
@@ -32,19 +31,19 @@ Tella_LoadDLL(void* hMod)
 #endif
 
 	mainModule = hMod;
-	SG::Profiler::Manager::Alloc();
+	px::profiler::manager::Alloc();
 
-	SG::logger.StartLogs();
+	px::logger.StartLogs();
 
-	SG::lib_manager.BuildDirectories();
+	px::lib_manager.BuildDirectories();
 
-	if (!SG::plugin_manager.BasicInit())
+	if (!px::plugin_manager.BasicInit())
 	{
         RemoveVectoredExceptionHandler(g_ExceptionHandler);
-        SG::Profiler::Manager::Release();
+        px::profiler::manager::Release();
 
-		SG_LOG_FATAL(
-			SG_MESSAGE("Failed to load main plugin, check for any missing configs.")
+		PX_LOG_FATAL(
+			PX_MESSAGE("Failed to load main plugin, check for any missing configs.")
 		);
 		return false;
 	}
@@ -52,15 +51,15 @@ Tella_LoadDLL(void* hMod)
 	return true;
 }
 
-static SG::DWord
+static unsigned long
 BOOST_WINAPI_DETAIL_STDCALL
 Tella_EjectDLL(void* hMod)
 {
-	SG::plugin_manager.UnloadAllDLLs();
+	px::plugin_manager.UnloadAllDLLs();
 
-    SG::Profiler::Manager::Release();
+    px::profiler::manager::Release();
     
-    SG::plugin_manager.BasicShutdown();
+    px::plugin_manager.BasicShutdown();
 
     RemoveVectoredExceptionHandler(g_ExceptionHandler);
 
@@ -72,10 +71,10 @@ Tella_EjectDLL(void* hMod)
 }
 
 
-void SG::DLLManager::Shutdown() noexcept
+void px::DLLManager::Shutdown() noexcept
 {
 #if BOOST_WINDOWS
-	HANDLE hThread = CreateThread(nullptr, NULL, Tella_EjectDLL, mainModule, NULL, nullptr);
+	HANDLE hThread = CreateThread(nullptr, NULL, &Tella_EjectDLL, mainModule, NULL, nullptr);
 	if (hThread)
 		CloseHandle(hThread);
 #else
@@ -127,7 +126,7 @@ LONG NTAPI OnRaiseException(_In_ PEXCEPTION_POINTERS ExceptionInfo)
             );
 
     HANDLE hFile = CreateFileW(
-        SG::FormatTime(L"./Pleiades/Logs/Fatal_{0:%g}_{0:%h}_{0:%d}_{0:%H}_{0:%OM}_{0:%OS}.dmp").c_str(),
+        px::FormatTime(L"./Pleiades/Logs/Fatal_{0:%g}_{0:%h}_{0:%d}_{0:%H}_{0:%OM}_{0:%OS}.dmp").c_str(),
         GENERIC_WRITE,
         NULL, 
         NULL, 

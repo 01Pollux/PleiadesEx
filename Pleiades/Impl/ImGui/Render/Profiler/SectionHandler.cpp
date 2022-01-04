@@ -3,14 +3,14 @@
 #include <regex>
 
 #include <nlohmann/Json.hpp>
-#include <shadowgarden/users/String.hpp>
+#include <px/string.hpp>
 
 #include "Impl/Library/LibrarySys.hpp"
 #include "Profiler.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
-void ImGuiProfilerInstance::SectionHandler::Update(const Profiler::Types::entry_container& infos)
+void ImGuiProfilerInstance::SectionHandler::Update(const profiler::types::entry_container& infos)
 {
     this->Clear();
     m_Sections.reserve(infos.size());
@@ -22,7 +22,7 @@ void ImGuiProfilerInstance::SectionHandler::Update(const Profiler::Types::entry_
 }
 
 
-auto ImGuiProfilerInstance::SectionHandler::FindOrEmplaceWithinOffset(size_t stack_offset, const Profiler::Types::string_t& name)
+auto ImGuiProfilerInstance::SectionHandler::FindOrEmplaceWithinOffset(size_t stack_offset, const std::string& name)
 {
     for (auto iter = m_Sections.rbegin(); iter != m_Sections.rend(); iter++)
     {
@@ -117,10 +117,10 @@ void ImGuiProfilerInstance::SectionHandler::SetElapsedTime() noexcept
 void ImGuiProfilerInstance::SectionHandler::Export(const std::string& file_name)
 {
     using namespace std::chrono_literals;
-    using name_and_duration = std::pair<const char*, Profiler::Types::clock_duration>;
+    using name_and_duration = std::pair<const char*, profiler::types::clock_duration>;
 
     char path[MAX_PATH];
-    if (!SG::lib_manager.GoToDirectory(PlDirType::Profiler, nullptr, path, std::ssize(path)))
+    if (!px::lib_manager.GoToDirectory(PlDirType::Profiler, nullptr, path, std::ssize(path)))
         return;
 
     nlohmann::json data;
@@ -158,9 +158,9 @@ void ImGuiProfilerInstance::SectionHandler::Export(const std::string& file_name)
         }
     }
 
-    std::ofstream file(std::format("{}/{}.{}.profiler.json", path, file_name, SG::FormatTime("__{0:%g}_{0:%h}_{0:%d}_{0:%H}_{0:%OM}_{0:%OS}")));
+    std::ofstream file(std::format("{}/{}.{}.profiler.json", path, file_name, px::FormatTime("__{0:%g}_{0:%h}_{0:%d}_{0:%H}_{0:%OM}_{0:%OS}")));
     file.width(4);
     file << data;
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

@@ -1,5 +1,5 @@
 
-#include <shadowgarden/interfaces/GameData.hpp>
+#include <px/interfaces/GameData.hpp>
 
 #include "Impl/Library/LibrarySys.hpp"
 #include "Impl/DetoursMan/HooksManager.hpp"
@@ -10,7 +10,7 @@
 #if BOOST_WINDOWS
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 ImGuiInterface imgui_iface;
 
@@ -19,22 +19,22 @@ bool ImGuiInterface::InitializeWindow(const nlohmann::json& config)
 	m_CurWindow = FindWindow(m_ProcWindowName.c_str(), nullptr);
 	if (!m_CurWindow)
 	{
-		SG_LOG_FATAL(
-			SG_MESSAGE("Failed to find window by class name"),
-			SG_LOGARG("Classname", m_ProcWindowName)
+		PX_LOG_FATAL(
+			PX_MESSAGE("Failed to find window by class name"),
+			PX_LOGARG("Classname", m_ProcWindowName)
 		);
 		return false;
 	}
 
-	std::unique_ptr<SG::IGameData> pData(SG::lib_manager.OpenGameData(nullptr));
+	std::unique_ptr<px::IGameData> pData(px::lib_manager.OpenGameData(nullptr));
 
-	m_D3Dx9EndScene = SG::detour_manager.LoadHook({ "IDirect3DDevice9" }, "EndScene", nullptr, pData.get(), nullptr, nullptr);
-	m_D3Dx9Reset = SG::detour_manager.LoadHook({ "IDirect3DDevice9" }, "Reset", nullptr, pData.get(), nullptr, nullptr);
+	m_D3Dx9EndScene = px::detour_manager.LoadHook(std::vector<std::string>{ "IDirect3DDevice9" }, "EndScene", nullptr, pData.get(), nullptr, nullptr);
+	m_D3Dx9Reset = px::detour_manager.LoadHook({ "IDirect3DDevice9" }, "Reset", nullptr, pData.get(), nullptr, nullptr);
 	
 	if (!m_D3Dx9EndScene || !m_D3Dx9Reset)
 	{
-		SG_LOG_FATAL(
-			SG_MESSAGE("Failed to load hook for IDirect3DDevice9::Reset/EndScene")
+		PX_LOG_FATAL(
+			PX_MESSAGE("Failed to load hook for IDirect3DDevice9::Reset/EndScene")
 		);
 		return false;
 	}
@@ -47,7 +47,7 @@ bool ImGuiInterface::InitializeWindow(const nlohmann::json& config)
 	namespace ph = std::placeholders;
 	m_D3Dx9EndScene->AddCallback(
 		false,
-		SG::HookOrder::ReservedFirst,
+		px::HookOrder::ReservedFirst,
 		std::bind(&ImGuiInterface::Pre_DeviceEndScene, this, ph::_1, ph::_2)
 	);
 
@@ -57,7 +57,7 @@ bool ImGuiInterface::InitializeWindow(const nlohmann::json& config)
 
 		m_D3Dx9Reset->AddCallback(
 			r,
-			r ? SG::HookOrder::ReservedLast : SG::HookOrder::ReservedFirst,
+			r ? px::HookOrder::ReservedLast : px::HookOrder::ReservedFirst,
 			std::bind(&ImGuiInterface::OnDeviceReset, this, ph::_1, ph::_2, r)
 		);
 	}
@@ -75,9 +75,9 @@ bool ImGuiInterface::InitializeWindow(const nlohmann::json& config)
 void ImGuiInterface::ShutdownWindow(bool unload_all)
 {
 	if (m_D3Dx9EndScene)
-		SG::detour_manager.ReleaseHook(m_D3Dx9EndScene);
+		px::detour_manager.ReleaseHook(m_D3Dx9EndScene);
 	if (m_D3Dx9Reset)
-		SG::detour_manager.ReleaseHook(m_D3Dx9Reset);
+		px::detour_manager.ReleaseHook(m_D3Dx9Reset);
 
 	if (m_OldProc)
 	{
@@ -92,11 +92,11 @@ void ImGuiInterface::ShutdownWindow(bool unload_all)
 		ImGui::DestroyContext(m_ImGuiContext);
 
 	if (unload_all)
-		SG::plugin_manager.Shutdown();
+		px::plugin_manager.Shutdown();
 }
 
 
-SG::MHookRes ImGuiInterface::Pre_DeviceEndScene(SG::PassRet* pRet, SG::PassArgs* pArgs)
+px::MHookRes ImGuiInterface::Pre_DeviceEndScene(px::PassRet* pRet, px::PassArgs* pArgs)
 {
 	static std::atomic_bool init = false;
 	if (!init)
@@ -105,7 +105,7 @@ SG::MHookRes ImGuiInterface::Pre_DeviceEndScene(SG::PassRet* pRet, SG::PassArgs*
 		ImGui_ImplDX9_Init(pArgs->get<IDirect3DDevice9*>(0));
 	}
 
-	SG::MHookRes res;
+	px::MHookRes res;
 
 	ImGui_ImplDX9_NewFrame();
 	ImGui_ImplWin32_NewFrame();
@@ -120,7 +120,7 @@ SG::MHookRes ImGuiInterface::Pre_DeviceEndScene(SG::PassRet* pRet, SG::PassArgs*
 		if (ImGui::Begin("Pleiades", &m_WindowsIsOn, main_flags) && !m_Renderer.RenderAll())
 		{
 			// We are shutting down, immediatly exit and restore the hook while not calling the function nor post hooks
-			res = SG::BitMask_Or(SG::HookRes::BreakLoop, SG::HookRes::DontCall, SG::HookRes::SkipPost, SG::HookRes::ChangedReturn);
+			res = px::bitmask_or(px::HookRes::BreakLoop, px::HookRes::DontCall, px::HookRes::SkipPost, px::HookRes::ChangedReturn);
 			pRet->set(NULL /*D3D_OK*/);
 		}
 
@@ -134,14 +134,14 @@ SG::MHookRes ImGuiInterface::Pre_DeviceEndScene(SG::PassRet* pRet, SG::PassArgs*
 
 	// Fix for random crash (race condition) when unloading.
 	// while unloading, the original function might returns too late to the old (deleted) address.
-	if (res.test(SG::HookRes::BreakLoop))
+	if (res.test(px::HookRes::BreakLoop))
 		ShutdownWindow(true);
 
 	return res;
 }
 
 
-SG::MHookRes ImGuiInterface::OnDeviceReset(SG::PassRet* pRet, SG::PassArgs * pArgs, bool is_post)
+px::MHookRes ImGuiInterface::OnDeviceReset(px::PassRet* pRet, px::PassArgs * pArgs, bool is_post)
 {
 	if (!is_post)
 		ImGui_ImplDX9_InvalidateDeviceObjects();
@@ -150,22 +150,22 @@ SG::MHookRes ImGuiInterface::OnDeviceReset(SG::PassRet* pRet, SG::PassArgs * pAr
 		if (SUCCEEDED(pRet->get<HRESULT>()))
 			ImGui_ImplDX9_CreateDeviceObjects();
 	}
-	return SG::BitMask_And(SG::HookRes::Ignored);
+	return px::bitmask_or(px::HookRes::Ignored);
 }
 
 
 LRESULT WINAPI ImGuiInterface::WinProcCallback(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	if (uMsg == WM_KEYUP && wParam == VK_END)
-		SG::imgui_iface.m_WindowsIsOn = !SG::imgui_iface.m_WindowsIsOn;
+		px::imgui_iface.m_WindowsIsOn = !px::imgui_iface.m_WindowsIsOn;
 
-	if (!SG::imgui_iface.m_WindowsIsOn)
+	if (!px::imgui_iface.m_WindowsIsOn)
 		ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 
 	ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam);
-	return SG::imgui_iface.m_WindowsIsOn ? TRUE : CallWindowProc(SG::imgui_iface.m_OldProc, hWnd, uMsg, wParam, lParam);
+	return px::imgui_iface.m_WindowsIsOn ? TRUE : CallWindowProc(px::imgui_iface.m_OldProc, hWnd, uMsg, wParam, lParam);
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();
 
 #endif

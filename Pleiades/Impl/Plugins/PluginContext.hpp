@@ -3,16 +3,16 @@
 #include <filesystem>
 
 #include <nlohmann/Json.hpp>
-#include <shadowgarden/interfaces/PluginSys.hpp>
-#include <shadowgarden/Interfaces/LibrarySys.hpp>
+#include <px/interfaces/PluginSys.hpp>
+#include <px/Interfaces/LibrarySys.hpp>
 
-#include <shadowgarden/users/Version.hpp>
-#include <shadowgarden/users/IntPtr.hpp>
+#include <px/version.hpp>
+#include <px/intptr.hpp>
 
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
-using PluginInitFn = SG::IPlugin* (__cdecl*)();
+using PluginInitFn = px::IPlugin* (__cdecl*)();
 constexpr const char* GlobalInitFunction = "Tella_GetPlugin";
 
 class ConCommand;
@@ -114,4 +114,4 @@ private:
 }
 */
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

@@ -5,13 +5,13 @@
 #include "Impl/Library/LibrarySys.hpp"
 #include "../../imgui_iface.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 void ImGuiThemesManager::ReloadThemes()
 {
 	this->m_LoadedThemes.clear();
 	char path[MAX_PATH];
-	if (SG::lib_manager.GoToDirectory(SG::PlDirType::Main, "Themes", path, std::ssize(path)))
+	if (px::lib_manager.GoToDirectory(px::PlDirType::Main, "Themes", path, std::ssize(path)))
 	{
 		namespace fs = std::filesystem;
 		for (auto& dir : fs::directory_iterator(path))
@@ -158,4 +158,4 @@ void ImGuiThemesManager::SetColors(const ImGuiTheme& theme)
 }
 
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

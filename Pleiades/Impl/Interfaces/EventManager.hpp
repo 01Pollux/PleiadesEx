@@ -1,8 +1,8 @@
 #pragma once
 
-#include <shadowgarden/interfaces/EventManager.hpp>
+#include <px/interfaces/EventManager.hpp>
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 struct EventCallbackWrapper;
 
@@ -30,4 +30,4 @@ private:
 
 extern EventManager event_manager;
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

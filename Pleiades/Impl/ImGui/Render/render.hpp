@@ -3,13 +3,13 @@
 #include <map>
 #include <functional>
 
-#include <shadowgarden/interfaces/ImGui.hpp>
-#include <shadowgarden/interfaces/InterfacesSys.hpp>
-#include <shadowgarden/users/FontAwesome_Icons.hpp>
+#include <px/interfaces/ImGui.hpp>
+#include <px/interfaces/InterfacesSys.hpp>
+#include <px/icons/FontAwesome.hpp>
 
 #include "Themes/Themes.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 #define PlVersionFmt(ver)	ver.major(), ver.minor(), ver.build(), ver.revision()
 
@@ -24,7 +24,7 @@ public:
 	{
 		callback_type Callback;
 		IPlugin* Plugin;
-		SG::ImGuiPlCallbackId Id;
+		px::ImGuiPlCallbackId Id;
 
 		bool _Changed{ };
 		bool _SafeToClose{ };
@@ -97,4 +97,4 @@ public:
 };
 
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

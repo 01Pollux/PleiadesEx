@@ -1,7 +1,7 @@
 #include "Logger.hpp"
 #include <imgui/imgui_internal.h>
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 // TODO: logs -> rename Message to Warning
 // TODO: for Fatal : bright red, Error Red brown, Warning : yellow, Debug Dark green
@@ -222,4 +222,4 @@ bool ImGuiJsLogInfo::FilterInfo(const ImGuiTextFilter& filter, nlohmann::json::c
 	return filter.CountGrep == 0;
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

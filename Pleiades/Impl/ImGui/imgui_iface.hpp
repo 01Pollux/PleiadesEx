@@ -2,10 +2,10 @@
 
 #include <boost/system.hpp>
 
-#include <shadowgarden/users/IntPtr.hpp>
-#include <shadowgarden/interfaces/InterfacesSys.hpp>
-#include <shadowgarden/interfaces/HooksManager.hpp>
-#include <shadowgarden/interfaces/ImGui.hpp>
+#include <px/intptr.hpp>
+#include <px/interfaces/InterfacesSys.hpp>
+#include <px/interfaces/HooksManager.hpp>
+#include <px/interfaces/ImGui.hpp>
 
 #include "Render/render.hpp"
 
@@ -22,9 +22,9 @@
 
 #endif
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
-class ImGuiInterface final : public SG::IImGuiLoader
+class ImGuiInterface final : public px::IImGuiLoader
 {
 public:
 	bool LoadImGui(const nlohmann::json& cfg);
@@ -39,11 +39,11 @@ public:
 	// Inherited via IImGuiLoader
 	ImGuiContext* GetContext() noexcept override;
 
-	SG::ImGuiPlCallbackId AddCallback(SG::IPlugin* plugin, const char* name, const SG::ImGuiPluginCallback& callback) override;
+	px::ImGuiPlCallbackId AddCallback(px::IPlugin* plugin, const char* name, const px::ImGuiPluginCallback& callback) override;
 	
-	void RemoveCallback(const SG::ImGuiPlCallbackId id) override;
+	void RemoveCallback(const px::ImGuiPlCallbackId id) override;
 
-	void RemoveCallback(const SG::IPlugin* plugin) noexcept  override;
+	void RemoveCallback(const px::IPlugin* plugin) noexcept  override;
 
 	bool IsMenuOn() override;
 
@@ -76,20 +76,20 @@ private:
 	void LoadFonts();
 
 #if BOOST_WINDOWS
-	SG::MHookRes Pre_DeviceEndScene(SG::PassRet* pRet, SG::PassArgs* pArgs);
+	px::MHookRes Pre_DeviceEndScene(px::PassRet* pRet, px::PassArgs* pArgs);
 
-	SG::MHookRes OnDeviceReset(SG::PassRet* pRet, SG::PassArgs* pArgs, bool is_post);
+	px::MHookRes OnDeviceReset(px::PassRet* pRet, px::PassArgs* pArgs, bool is_post);
 #endif
 
 private:
 #if BOOST_WINDOWS
 	HWND	m_CurWindow;
 	WNDPROC m_OldProc{ };
-	SG::IHookInstance* m_D3Dx9EndScene,* m_D3Dx9Reset;
+	px::IHookInstance* m_D3Dx9EndScene,* m_D3Dx9Reset;
 #endif
 
 	ImGuiContext*			 m_ImGuiContext{ };
-	SG::ImGui_BrdigeRenderer m_Renderer;
+	px::ImGui_BrdigeRenderer m_Renderer;
 	
 	std::string				 m_ProcWindowName;
 	
@@ -104,4 +104,4 @@ private:
 
 extern ImGuiInterface imgui_iface;
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

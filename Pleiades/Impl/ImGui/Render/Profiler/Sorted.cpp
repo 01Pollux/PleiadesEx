@@ -3,7 +3,7 @@
 #include <set>
 #include "Profiler.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 /*
 ---------------------------------------------------------------------------------
@@ -128,7 +128,7 @@ void ImGuiProfilerInstance::SectionHandler::DisplaySorted()
             if (ImGui::BeginTable("Sorted Table", 2, table_flags))
             {
                 using namespace std::chrono_literals;
-                using name_and_duration = std::pair<const char*, Profiler::Types::clock_duration>;
+                using name_and_duration = std::pair<const char*, profiler::types::clock_duration>;
 
                 for (auto& name_dur : {
                     name_and_duration{ "Min", entry.get().min },
@@ -192,4 +192,4 @@ void ImGuiProfilerInstance::SectionHandler::DisplaySorted()
     }
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

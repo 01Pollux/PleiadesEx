@@ -6,7 +6,7 @@
 #include "Impl/Library/LibrarySys.hpp"
 #include "Impl/Interfaces/Logger.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 void ImGui_BrdigeRenderer::RenderLogger()
 {
@@ -23,11 +23,11 @@ void ImGui_JsonLogger::LoadLogs()
 	m_LogSection.Plugins.clear();
 	char path[MAX_PATH];
 
-	if (!SG::lib_manager.GoToDirectory(SG::PlDirType::Logs, nullptr, path, std::ssize(path)))
+	if (!px::lib_manager.GoToDirectory(px::PlDirType::Logs, nullptr, path, std::ssize(path)))
 	{
-		SG_LOG_MESSAGE(
-			SG_MESSAGE("Exception reported while loading Packs"),
-			SG_LOGARG("Exception", path)
+		PX_LOG_MESSAGE(
+			PX_MESSAGE("Exception reported while loading Packs"),
+			PX_LOGARG("Exception", path)
 		);
 		m_LogSection.reset();
 		return;
@@ -103,4 +103,4 @@ void ImGui_JsonLogger::DrawLoggerDesign()
 }
 
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

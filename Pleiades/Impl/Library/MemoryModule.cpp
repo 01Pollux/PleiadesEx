@@ -1,13 +1,13 @@
 #include <fstream>
 #include <iostream>
 
-#include <shadowgarden/users/Modules.hpp>
-#include <shadowgarden/users/String.hpp>
+#include <px/modules.hpp>
+#include <px/string.hpp>
 
 #include "LibrarySys.hpp"
 #include "Impl/Plugins/PluginManager.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 LibraryManager::LibraryManager() noexcept :
 	m_Runtime(std::make_unique<asmjit::JitRuntime>())
@@ -74,4 +74,4 @@ LibraryImpl::~LibraryImpl()
 #endif
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

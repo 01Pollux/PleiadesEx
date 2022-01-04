@@ -2,10 +2,10 @@
 
 #include <unordered_map>
 #include <nlohmann/Json.hpp>
-#include <shadowgarden/defines.hpp>
+#include <px/defines.hpp>
 
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 namespace DetourDetail
 {
@@ -48,4 +48,4 @@ namespace DetourDetail
 	};
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

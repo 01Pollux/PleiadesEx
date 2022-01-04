@@ -3,13 +3,13 @@
 #include <fstream>
 #include <list>
 
-#include <shadowgarden/users/String.hpp>
+#include <px/string.hpp>
 
 #include "Impl/Library/LibrarySys.hpp"
 #include "Impl/Console/config.hpp"
 #include "PluginContext.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 namespace fs = std::filesystem;
 
@@ -18,7 +18,6 @@ PluginContext::PluginContext(fs::path& root_path, const std::string& cur_name, c
 	root_path.append(cur_name).append(cur_name);
 
 	bool start_paused = false;
-	bool is_x64 = false;
 	// Check dependencies, and if the current process is supported in '*.config.json' first
 	{
 		std::ifstream file(root_path.string() + ".config.json");
@@ -95,10 +94,6 @@ PluginContext::PluginContext(fs::path& root_path, const std::string& cur_name, c
 						*var_and_name.first = *iter;
 					}
 				}
-
-				// check if the plugin should be loaded in 64 bits
-				const auto jis_x64 = info_sec->find("64 bits");
-				is_x64 = jis_x64 != info_sec->end() && jis_x64->is_boolean() ? jis_x64->get<bool>() : false;
 			}
 		}
 		catch (const std::exception& ex)
@@ -120,10 +115,7 @@ PluginContext::PluginContext(fs::path& root_path, const std::string& cur_name, c
 	std::unique_ptr<ILibrary> hMod;
 	static_assert(std::is_same_v<decltype(root_path.c_str()), const wchar_t*>);
 
-	if (is_x64)
-		hMod.reset(lib_manager.OpenLibrary(root_path.c_str()));
-	else
-		hMod.reset(lib_manager.OpenLibrary(root_path.string().c_str()));
+	hMod.reset(lib_manager.OpenLibrary(root_path.string().c_str()));
 
 	if (!hMod)
 	{
@@ -186,7 +178,7 @@ void PluginContext::LoadConfig()
 			cmds += std::move(line) + ';';
 		}
 		if (!cmds.empty())
-			SG::console_manager.Execute(cmds);
+			px::console_manager.Execute(cmds);
 	}
 }
 
@@ -222,4 +214,4 @@ PluginContext::~PluginContext()
 		m_Plugin->OnPluginUnload();
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

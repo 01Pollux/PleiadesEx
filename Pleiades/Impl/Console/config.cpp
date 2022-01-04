@@ -2,7 +2,7 @@
 #include "Impl/ImGui/Render/Console/Console.hpp"
 #include "config.hpp"
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 ConsoleManager console_manager;
 
@@ -23,7 +23,7 @@ bool ConsoleManager::AddCommands(ConCommand* command)
 
 bool ConsoleManager::RemoveCommand(ConCommand* command)
 {
-	PluginContext* pCtx = SG::plugin_manager.FindContext(command->plugin());
+	PluginContext* pCtx = px::plugin_manager.FindContext(command->plugin());
 	if (!pCtx)
 		return false;
 
@@ -46,7 +46,7 @@ void ConsoleManager::RemoveCommands()
 
 bool ConsoleManager::RemoveCommands(IPlugin* plugin)
 {
-	PluginContext* pCtx = SG::plugin_manager.FindContext(plugin);
+	PluginContext* pCtx = px::plugin_manager.FindContext(plugin);
 	if (!pCtx)
 		return false;
 
@@ -176,7 +176,7 @@ void ConsoleManager::Execute(const std::string_view& cmds)
                     ++iter;
 
                 std::string_view cmd_name = { last_begin, iter };
-                ConCommand* pCmd = SG::console_manager.FindCommand(cmd_name);
+                ConCommand* pCmd = px::console_manager.FindCommand(cmd_name);
 
                 // there is more than command name, fetch them
                 if (pCmd && iter != end)
@@ -390,4 +390,4 @@ void ConsoleManager::Print(uint32_t color, const std::string& msg)
 	);
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

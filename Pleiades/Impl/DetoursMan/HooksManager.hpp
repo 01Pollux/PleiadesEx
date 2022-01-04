@@ -3,7 +3,7 @@
 #include "HookInstance.hpp"
 
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 class DetoursManager : public IDetoursManager
 {
@@ -19,4 +19,4 @@ private:
 
 extern DetoursManager detour_manager;
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

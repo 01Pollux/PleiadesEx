@@ -2,12 +2,12 @@
 
 #include <stack>
 #include <asmjit/asmjit.h>
-#include <shadowgarden/interfaces/HookArgs.hpp>
+#include <px/interfaces/HookArgs.hpp>
 
 #include "SigBuilder.hpp"
 
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 
 class CallContext
 {
@@ -75,4 +75,4 @@ private:
 	> m_SavedRets;
 };
 	
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();

@@ -1,7 +1,7 @@
 
 #include "CallContext.hpp"
 
-namespace ShadowGarden
+namespace px
 {
 	CallContext::CallContext(InitToken&& token) :
 		m_FuncSig(token.FuncSig),

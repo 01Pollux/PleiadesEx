@@ -5,30 +5,30 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/predef.h>
 
-#include <shadowgarden/interfaces/PluginSys.hpp>
+#include <px/interfaces/PluginSys.hpp>
 
 #include "Impl/Library/LibrarySys.hpp"
 #include "Impl/Interfaces/Logger.hpp"
 #include "GameData.hpp"
 
 
-SG_NAMESPACE_BEGIN;
+PX_NAMESPACE_BEGIN();
 	
 GameData::GameData(IPlugin* pPlugin) :
 	m_Plugin(pPlugin),
-	m_Paths{ std::format("{}.{}", ILibraryManager::CommonTag, SG::lib_manager.GetHostName()) }
+	m_Paths{ std::format("{}.{}", ILibraryManager::CommonTag, px::lib_manager.GetHostName()) }
 {
 	if (pPlugin)
-		m_Paths.emplace_back(std::format("{0}/{1}/{1}.{2}", ILibraryManager::PluginsDir, pPlugin ? pPlugin->GetFileName() : ILibraryManager::MainName, SG::lib_manager.GetHostName()));
+		m_Paths.emplace_back(std::format("{0}/{1}/{1}.{2}", ILibraryManager::PluginsDir, pPlugin ? pPlugin->GetFileName() : ILibraryManager::MainName, px::lib_manager.GetHostName()));
 }
 
-void GameData::PushFiles(std::initializer_list<const char*> files)
+void GameData::PushFiles(const std::vector<std::string>& files)
 {
-	const std::string& host_name = SG::lib_manager.GetHostName();
+	const std::string& host_name = px::lib_manager.GetHostName();
 	m_Paths.reserve(m_Paths.size() + files.size());
 	const char* const file_name = this->GetPluginName();
 
-	for (auto file : files)
+	for (auto& file : files)
 	{
 		m_Paths.emplace_back(
 			std::format(
@@ -74,12 +74,12 @@ IntPtr GameData::ReadSignature(const std::vector<std::string>& keys, const std::
 	}
 	catch (const std::exception& ex)
 	{
-		SG_LOG_ERROR(
-			SG_MESSAGE("Exception reported while reading signature."),
-			SG_LOGARG("Plugin", this->GetPluginName()),
-			SG_LOGARG("Keys", keys),
-			SG_LOGARG("Signature", signame),
-			SG_LOGARG("Exception", ex.what())
+		PX_LOG_ERROR(
+			PX_MESSAGE("Exception reported while reading signature."),
+			PX_LOGARG("Plugin", this->GetPluginName()),
+			PX_LOGARG("Keys", keys),
+			PX_LOGARG("Signature", signame),
+			PX_LOGARG("Exception", ex.what())
 		);
 	}
 
@@ -117,12 +117,12 @@ IntPtr GameData::ReadAddress(const std::vector<std::string>& keys, const std::st
 	}
 	catch (const std::exception& ex)
 	{
-		SG_LOG_ERROR(
-			SG_MESSAGE("Exception reported while reading address."),
-			SG_LOGARG("Plugin", this->GetPluginName()),
-			SG_LOGARG("Address", addrname),
-			SG_LOGARG("Keys", keys),
-			SG_LOGARG("Exception", ex.what())
+		PX_LOG_ERROR(
+			PX_MESSAGE("Exception reported while reading address."),
+			PX_LOGARG("Plugin", this->GetPluginName()),
+			PX_LOGARG("Address", addrname),
+			PX_LOGARG("Keys", keys),
+			PX_LOGARG("Exception", ex.what())
 		);
 	}
 
@@ -180,12 +180,12 @@ nlohmann::json GameData::ReadDetour(const std::vector<std::string>& keys, const 
 	}
 	catch (const std::exception& ex)
 	{
-		SG_LOG_ERROR(
-			SG_MESSAGE("Exception reported while reading detour."),
-			SG_LOGARG("Plugin", this->GetPluginName()),
-			SG_LOGARG("Detour", detourname),
-			SG_LOGARG("Keys", keys),
-			SG_LOGARG("Exception", ex.what())
+		PX_LOG_ERROR(
+			PX_MESSAGE("Exception reported while reading detour."),
+			PX_LOGARG("Plugin", this->GetPluginName()),
+			PX_LOGARG("Detour", detourname),
+			PX_LOGARG("Keys", keys),
+			PX_LOGARG("Exception", ex.what())
 		);
 	}
 
@@ -216,7 +216,7 @@ IntPtr GameData::LoadSignature(const nlohmann::json& info, bool is_signature)
 	}
 
 	const std::string& lib_name = info["library"].get_ref<const std::string&>();
-	std::unique_ptr<LibraryImpl> lib(static_cast<LibraryImpl*>(SG::lib_manager.ReadLibrary(lib_name.c_str())));
+	std::unique_ptr<LibraryImpl> lib(static_cast<LibraryImpl*>(px::lib_manager.ReadLibrary(lib_name.c_str())));
 
 	if (!lib)
 	{
@@ -303,12 +303,12 @@ std::optional<int> GameData::LoadOffset(const std::vector<std::string>& keys, co
 	}
 	catch (const std::exception& ex)
 	{
-		SG_LOG_ERROR(
-			SG_MESSAGE(is_offset ? "Exception reported while reading offsets." : "Exception reported while reading virtuals."),
-			SG_LOGARG("Plugin", this->GetPluginName()),
-			SG_LOGARG("Name", name),
-			SG_LOGARG("Keys", keys),
-			SG_LOGARG("Exception", ex.what())
+		PX_LOG_ERROR(
+			PX_MESSAGE(is_offset ? "Exception reported while reading offsets." : "Exception reported while reading virtuals."),
+			PX_LOGARG("Plugin", this->GetPluginName()),
+			PX_LOGARG("Name", name),
+			PX_LOGARG("Keys", keys),
+			PX_LOGARG("Exception", ex.what())
 		);
 	}
 	return std::nullopt;
@@ -332,4 +332,4 @@ const char* GameData::GetPluginName() const noexcept
 	return m_Plugin ? m_Plugin->GetFileName().c_str() : ILibraryManager::MainName;
 }
 
-SG_NAMESPACE_END;
+PX_NAMESPACE_END();
