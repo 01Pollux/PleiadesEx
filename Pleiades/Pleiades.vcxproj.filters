@@ -18,252 +18,196 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\Library\LibrarySys.cpp">
+    <ClCompile Include="imgui\backends\dx9\imgui_impl_dx9.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\Plugins\PluginManager.cpp">
+    <ClCompile Include="imgui\backends\win32\imgui_impl_win32.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\Plugins\PluginContext.cpp">
+    <ClCompile Include="imgui\backends\dx9\Manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\Interfaces\EventManager.cpp">
+    <ClCompile Include="detours\msdetour\creatwth.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\Interfaces\InterfaceSys.cpp">
+    <ClCompile Include="detours\msdetour\detours.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\Library\MemoryModule.cpp">
+    <ClCompile Include="detours\msdetour\disasm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\Interfaces\Logger.cpp">
+    <ClCompile Include="detours\msdetour\disolarm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\DetoursMan\CallContext.cpp">
+    <ClCompile Include="detours\msdetour\disolarm64.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\DetoursMan\HookInstance.cpp">
+    <ClCompile Include="detours\msdetour\disolia64.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\DetoursMan\SigBuilder.cpp">
+    <ClCompile Include="detours\msdetour\disolx64.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\DetoursMan\TypeTable.cpp">
+    <ClCompile Include="detours\msdetour\disolx86.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\DetoursMan\MSDetour\creatwth.cpp">
+    <ClCompile Include="detours\msdetour\image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\DetoursMan\MSDetour\detours.cpp">
+    <ClCompile Include="detours\msdetour\modules.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\DetoursMan\MSDetour\disasm.cpp">
+    <ClCompile Include="detours\CallContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\DetoursMan\MSDetour\disolarm.cpp">
+    <ClCompile Include="detours\HookInstance.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\DetoursMan\MSDetour\disolarm64.cpp">
+    <ClCompile Include="detours\HooksManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\DetoursMan\MSDetour\disolia64.cpp">
+    <ClCompile Include="detours\SigBuilder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\DetoursMan\MSDetour\disolx64.cpp">
+    <ClCompile Include="detours\TypeTable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\DetoursMan\MSDetour\disolx86.cpp">
+    <ClCompile Include="logs\Logger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\DetoursMan\MSDetour\image.cpp">
+    <ClCompile Include="plugins\GameData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\DetoursMan\MSDetour\modules.cpp">
+    <ClCompile Include="library\Manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\DetoursMan\HooksManager.cpp">
+    <ClCompile Include="library\Module.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\Library\GameData.cpp">
+    <ClCompile Include="plugins\Plugins.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\ImGui\Render\Compiled_Fonts\Arimo_Medium.cpp">
+    <ClCompile Include="plugins\Context.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\ImGui\Render\Compiled_Fonts\FontAwesome900_Solid.cpp">
+    <ClCompile Include="plugins\Manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\ImGui\Render\Logger\Filter.cpp">
+    <ClCompile Include="events\Manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\ImGui\Render\Logger\JsInfo.cpp">
+    <ClCompile Include="console\Manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\ImGui\Render\Logger\Logger.cpp">
+    <ClCompile Include="imgui\frontends\console\commands\clear.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\ImGui\Render\PluginManager\PlInfo.cpp">
+    <ClCompile Include="imgui\frontends\console\commands\exec.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\ImGui\Render\PluginManager\PluginManager.cpp">
+    <ClCompile Include="imgui\frontends\console\commands\find.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\ImGui\Render\Profiler\ImPlot\implot.cpp">
+    <ClCompile Include="imgui\frontends\console\commands\help.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\ImGui\Render\Profiler\ImPlot\implot_demo.cpp">
+    <ClCompile Include="imgui\frontends\console\Console.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\ImGui\Render\Profiler\ImPlot\implot_items.cpp">
+    <ClCompile Include="imgui\frontends\themes\Themes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\ImGui\Render\Profiler\Draw.cpp">
+    <ClCompile Include="imgui\backends\renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\ImGui\Render\Profiler\Hierachy.cpp">
+    <ClCompile Include="imgui\imgui_shared.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\ImGui\Render\Profiler\PlotBars.cpp">
+    <ClCompile Include="imgui\imgui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\ImGui\Render\Profiler\Profiler.cpp">
+    <ClCompile Include="imgui\backends\compiled_fonts\Arimo_Medium.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\ImGui\Render\Profiler\SectionHandler.cpp">
+    <ClCompile Include="imgui\backends\compiled_fonts\FontAwesome900_Solid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impl\ImGui\Render\Profiler\Sorted.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Impl\ImGui\Render\PropManager\PropManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Impl\ImGui\Render\Themes\Themes.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Impl\ImGui\Render\MainRenderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Impl\ImGui\imgui_endscene_h.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Impl\ImGui\imgui_shared.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Impl\ImGui\imgui.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Impl\ImGui\Backends\imgui_impl_dx9.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Impl\ImGui\Backends\imgui_impl_win32.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Impl\Console\config.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Impl\ImGui\Render\Console\Console.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Impl\ImGui\Render\Console\Commands\help.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Impl\ImGui\Render\Console\Commands\clear.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Impl\ImGui\Render\Console\Commands\find.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Impl\ImGui\Render\Console\Commands\exec.cpp">
+    <ClCompile Include="imgui\backends\console.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Impl\Library\LibrarySys.hpp">
+    <ClInclude Include="imgui\backends\dx9\imgui_impl_dx9.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Impl\Plugins\PluginManager.hpp">
+    <ClInclude Include="imgui\backends\win32\imgui_impl_win32.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Impl\Plugins\PluginContext.hpp">
+    <ClInclude Include="imgui\backends\dx9\Manager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Impl\Interfaces\EventManager.hpp">
+    <ClInclude Include="detours\CallContext.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Impl\Interfaces\Logger.hpp">
+    <ClInclude Include="detours\Detour.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Impl\DetoursMan\CallContext.hpp">
+    <ClInclude Include="detours\HookInstance.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Impl\DetoursMan\Detour.hpp">
+    <ClInclude Include="detours\HooksManager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Impl\DetoursMan\HookInstance.hpp">
+    <ClInclude Include="detours\SigBuilder.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Impl\DetoursMan\SigBuilder.hpp">
+    <ClInclude Include="detours\TypeTable.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Impl\DetoursMan\TypeTable.hpp">
+    <ClInclude Include="detours\msdetour\detours.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Impl\DetoursMan\MSDetour\detours.hpp">
+    <ClInclude Include="detours\msdetour\detver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Impl\DetoursMan\MSDetour\detver.hpp">
+    <ClInclude Include="logs\Logger.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Impl\DetoursMan\HooksManager.hpp">
+    <ClInclude Include="plugins\GameData.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Impl\Library\GameData.hpp">
+    <ClInclude Include="library\Module.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Impl\Interfaces\Profiler.hpp">
+    <ClInclude Include="library\Manager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Impl\ImGui\Render\Logger\Logger.hpp">
+    <ClInclude Include="plugins\Manager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Impl\ImGui\Render\PluginManager\PluginManager.hpp">
+    <ClInclude Include="plugins\Context.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Impl\ImGui\Render\Profiler\ImPlot\implot.h">
+    <ClInclude Include="imgui\backends\States.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Impl\ImGui\Render\Profiler\ImPlot\implot_internal.h">
+    <ClInclude Include="events\Manager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Impl\ImGui\Render\Profiler\Profiler.hpp">
+    <ClInclude Include="console\Manager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Impl\ImGui\Render\Themes\Themes.hpp">
+    <ClInclude Include="imgui\frontends\console\Console.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Impl\ImGui\Render\render.hpp">
+    <ClInclude Include="imgui\frontends\themes\Themes.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Impl\ImGui\Defines.hpp">
+    <ClInclude Include="imgui\frontends\renderer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Impl\ImGui\imgui_iface.hpp">
+    <ClInclude Include="imgui\imgui_iface.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Impl\Console\config.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Impl\ImGui\Render\Console\Console.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Natvis Include="Json.natvis" />
-    <Natvis Include="imgui.natvis" />
-    <Natvis Include="asmjit.natvis" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="imgui.natstepfilter" />
   </ItemGroup>
 </Project>

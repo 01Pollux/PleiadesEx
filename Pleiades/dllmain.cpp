@@ -1,168 +1,168 @@
-#include <boost/config.hpp>
+
+#define WIN32_MEAN_AND_LEAN
+#include <Windows.h>
+
+#include <memory>
+#include <format>
+#include <chrono>
 
 #include <px/profiler.hpp>
-#include <px/modules.hpp>
-#include <px/string.hpp>
 
-#include "Impl/Plugins/PluginManager.hpp"
-#include "Impl/Library/LibrarySys.hpp"
-#include "Impl/Interfaces/Logger.hpp"
-#include "Impl/ImGui/imgui_iface.hpp"
+#include "library/Manager.hpp"
+#include "plugins/Manager.hpp"
+#include "detours/HooksManager.hpp"
+#include "Logs/Logger.hpp"
 
-#if BOOST_WINDOWS
 #define WIN32_MEAN_AND_LEAN
 #include <Windows.h>
 #include <minidumpapiset.h>
-#include <mmsystem.h>
+
 static PVOID g_ExceptionHandler;
-#endif
+static PVOID g_hModule;
 
-static void* mainModule;
+LONG NTAPI OnRaiseException(_In_ PEXCEPTION_POINTERS ExceptionInfo);
 
-#if BOOST_WINDOWS
-static LONG NTAPI OnRaiseException(_In_ PEXCEPTION_POINTERS ExceptionInfo);
-#endif
-
-extern "C" BOOST_SYMBOL_EXPORT bool
+extern "C" __declspec(dllexport) bool __cdecl
 Tella_LoadDLL(void* hMod)
 {
-#if BOOST_WINDOWS
-    g_ExceptionHandler = AddVectoredExceptionHandler(1, OnRaiseException);
-#endif
+	CreateThread(
+		nullptr,
+		0,
+		[](LPVOID hMod) -> DWORD
+		{
+			g_ExceptionHandler = AddVectoredExceptionHandler(1, OnRaiseException);
 
-	mainModule = hMod;
-	px::profiler::manager::Alloc();
+			px::profiler::manager::Alloc();
+			px::logger.StartLogs();
 
-	px::logger.StartLogs();
+			px::lib_manager.BuildDirectories();
 
-	px::lib_manager.BuildDirectories();
+			if (!px::plugin_manager.BasicInit())
+			{
+				px::profiler::manager::Release();
+				RemoveVectoredExceptionHandler(g_ExceptionHandler);
+				PX_LOG_FATAL(
+					PX_MESSAGE("Failed to load main plugin, check for any missing configs.")
+				);
 
-	if (!px::plugin_manager.BasicInit())
-	{
-        RemoveVectoredExceptionHandler(g_ExceptionHandler);
-        px::profiler::manager::Release();
-
-		PX_LOG_FATAL(
-			PX_MESSAGE("Failed to load main plugin, check for any missing configs.")
-		);
-		return false;
-	}
-
+				FreeLibraryAndExitThread(std::bit_cast<HMODULE>(hMod), EXIT_SUCCESS);
+			}
+			else g_hModule = hMod;
+			return EXIT_SUCCESS;
+		},
+		hMod,
+		0,
+		nullptr
+	);
 	return true;
 }
 
-static unsigned long
-BOOST_WINAPI_DETAIL_STDCALL
-Tella_EjectDLL(void* hMod)
+
+void DLLManager::Shutdown() noexcept
 {
-	px::plugin_manager.UnloadAllDLLs();
+	CreateThread(
+		nullptr,
+		0,
+		[](LPVOID) -> DWORD
+		{
+			px::plugin_manager.UnloadAllDLLs();
 
-    px::profiler::manager::Release();
-    
-    px::plugin_manager.BasicShutdown();
+			px::profiler::manager::Release();
 
-    RemoveVectoredExceptionHandler(g_ExceptionHandler);
+			px::plugin_manager.BasicShutdown();
 
-#if BOOST_WINDOWS
-	FreeLibraryAndExitThread(std::bit_cast<HMODULE>(hMod), EXIT_SUCCESS);
-#endif
+			px::detour_manager.SleepToReleaseHooks();
 
-    return true;
+			RemoveVectoredExceptionHandler(g_ExceptionHandler);
+
+			FreeLibraryAndExitThread(std::bit_cast<HMODULE>(g_hModule), EXIT_SUCCESS);
+			
+			return EXIT_SUCCESS;
+		},
+		nullptr,
+		0,
+		nullptr
+	);
 }
 
-
-void px::DLLManager::Shutdown() noexcept
-{
-#if BOOST_WINDOWS
-	HANDLE hThread = CreateThread(nullptr, NULL, &Tella_EjectDLL, mainModule, NULL, nullptr);
-	if (hThread)
-		CloseHandle(hThread);
-#else
-	std::thread([] () { Tella_EjectDLL(mainModule); }).detach();
-#endif
-}
-
-
-#if BOOST_WINDOWS
 
 LONG NTAPI OnRaiseException(_In_ PEXCEPTION_POINTERS ExceptionInfo)
 {
-    std::unique_ptr<void, decltype([](void* handle){ FreeLibrary(std::bit_cast<HMODULE>(handle)); })> DBGHelp{ std::bit_cast<void*>(LoadLibrary(TEXT("DBGHelp.dll"))) };
-    if (!DBGHelp)
-        return EXCEPTION_CONTINUE_SEARCH;
+	std::unique_ptr<void, decltype([](void* handle) { FreeLibrary(std::bit_cast<HMODULE>(handle)); })> DBGHelp{ std::bit_cast<void*>(LoadLibraryW(L"DBGHelp.dll")) };
+	if (!DBGHelp)
+		return EXCEPTION_CONTINUE_SEARCH;
 
-    switch (ExceptionInfo->ExceptionRecord->ExceptionCode)
-    {
-    case EXCEPTION_ACCESS_VIOLATION:
-    case EXCEPTION_INVALID_HANDLE:
-    case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:
-    case EXCEPTION_DATATYPE_MISALIGNMENT:
-    case EXCEPTION_ILLEGAL_INSTRUCTION:
-    case EXCEPTION_INT_DIVIDE_BY_ZERO:
-    case EXCEPTION_STACK_OVERFLOW:
-    case EXCEPTION_STACK_INVALID:
-    case EXCEPTION_WRITE_FAULT:
-    case EXCEPTION_READ_FAULT:
-    case STATUS_STACK_BUFFER_OVERRUN:
-    case STATUS_HEAP_CORRUPTION:
-        break;
-    case EXCEPTION_BREAKPOINT:
-        if (!(ExceptionInfo->ExceptionRecord->ExceptionFlags & EXCEPTION_NONCONTINUABLE))
-            return EXCEPTION_CONTINUE_SEARCH;
-        break;
-    default:
-        return EXCEPTION_CONTINUE_SEARCH;
-    }
+	switch (ExceptionInfo->ExceptionRecord->ExceptionCode)
+	{
+	case EXCEPTION_ACCESS_VIOLATION:
+	case EXCEPTION_INVALID_HANDLE:
+	case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:
+	case EXCEPTION_DATATYPE_MISALIGNMENT:
+	case EXCEPTION_ILLEGAL_INSTRUCTION:
+	case EXCEPTION_INT_DIVIDE_BY_ZERO:
+	case EXCEPTION_STACK_OVERFLOW:
+	case EXCEPTION_STACK_INVALID:
+	case EXCEPTION_WRITE_FAULT:
+	case EXCEPTION_READ_FAULT:
+	case STATUS_STACK_BUFFER_OVERRUN:
+	case STATUS_HEAP_CORRUPTION:
+		break;
+	case EXCEPTION_BREAKPOINT:
+		if (!(ExceptionInfo->ExceptionRecord->ExceptionFlags & EXCEPTION_NONCONTINUABLE))
+			return EXCEPTION_CONTINUE_SEARCH;
+		break;
+	default:
+		return EXCEPTION_CONTINUE_SEARCH;
+	}
 
-    using MiniDumpWriteDumpFn =
-        BOOL(WINAPI*)(
-            _In_ HANDLE hProcess,
-            _In_ DWORD ProcessId,
-            _In_ HANDLE hFile,
-            _In_ MINIDUMP_TYPE DumpType,
-            _In_opt_ PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
-            _In_opt_ PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam,
-            _In_opt_ PMINIDUMP_CALLBACK_INFORMATION CallbackParam
-            );
+	using MiniDumpWriteDumpFn =
+		BOOL(WINAPI*)(
+			_In_ HANDLE hProcess,
+			_In_ DWORD ProcessId,
+			_In_ HANDLE hFile,
+			_In_ MINIDUMP_TYPE DumpType,
+			_In_opt_ PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
+			_In_opt_ PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam,
+			_In_opt_ PMINIDUMP_CALLBACK_INFORMATION CallbackParam
+			);
 
-    HANDLE hFile = CreateFileW(
-        px::FormatTime(L"./Pleiades/Logs/Fatal_{0:%g}_{0:%h}_{0:%d}_{0:%H}_{0:%OM}_{0:%OS}.dmp").c_str(),
-        GENERIC_WRITE,
-        NULL, 
-        NULL, 
-        CREATE_NEW, 
-        FILE_ATTRIBUTE_NORMAL, 
-        NULL
-    );
+	HANDLE hFile = CreateFileW(
+		std::format(L"./pleiades/logs/Fatal_{0:%g}_{0:%h}_{0:%d}_{0:%H}_{0:%OM}_{0:%OS}.dmp", std::chrono::system_clock::now()).c_str(),
+		GENERIC_WRITE,
+		NULL,
+		NULL,
+		CREATE_NEW,
+		FILE_ATTRIBUTE_NORMAL,
+		NULL
+	);
 
-    if (hFile == INVALID_HANDLE_VALUE)
-        return EXCEPTION_CONTINUE_SEARCH;
+	if (hFile == INVALID_HANDLE_VALUE)
+		return EXCEPTION_CONTINUE_SEARCH;
 
-    MiniDumpWriteDumpFn WriteMiniDump = std::bit_cast<MiniDumpWriteDumpFn>(GetProcAddress(std::bit_cast<HMODULE>(DBGHelp.get()), "MiniDumpWriteDump"));
+	MiniDumpWriteDumpFn WriteMiniDump = std::bit_cast<MiniDumpWriteDumpFn>(GetProcAddress(std::bit_cast<HMODULE>(DBGHelp.get()), "MiniDumpWriteDump"));
 
-    MINIDUMP_EXCEPTION_INFORMATION MiniDumpInfo{
-           .ThreadId = GetCurrentThreadId(),
-           .ExceptionPointers = ExceptionInfo,
-           .ClientPointers = FALSE };
+	MINIDUMP_EXCEPTION_INFORMATION MiniDumpInfo{
+		   .ThreadId = GetCurrentThreadId(),
+		   .ExceptionPointers = ExceptionInfo,
+		   .ClientPointers = FALSE
+	};
 
-    BOOL res = WriteMiniDump(
-        GetCurrentProcess(),
-        GetCurrentProcessId(),
-        hFile,
-        static_cast<MINIDUMP_TYPE>(MiniDumpWithUnloadedModules | MiniDumpWithFullMemoryInfo | MiniDumpWithCodeSegs),
-        &MiniDumpInfo,
-        NULL,
-        NULL
-    );
+	BOOL res = WriteMiniDump(
+		GetCurrentProcess(),
+		GetCurrentProcessId(),
+		hFile,
+		static_cast<MINIDUMP_TYPE>(MiniDumpWithUnloadedModules | MiniDumpWithFullMemoryInfo | MiniDumpWithCodeSegs),
+		&MiniDumpInfo,
+		NULL,
+		NULL
+	);
 
-    CloseHandle(hFile);
+	CloseHandle(hFile);
 
-    if (res)
-    {
-        ExceptionInfo->ExceptionRecord->ExceptionCode = EXCEPTION_BREAKPOINT;
-        return EXCEPTION_EXECUTE_HANDLER;
-    }
-    else return EXCEPTION_CONTINUE_SEARCH;
+	if (res)
+	{
+		ExceptionInfo->ExceptionRecord->ExceptionCode = EXCEPTION_BREAKPOINT;
+		return EXCEPTION_EXECUTE_HANDLER;
+	}
+	else return EXCEPTION_CONTINUE_SEARCH;
 }
-
-#endif

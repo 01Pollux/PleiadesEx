@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{8b637c83-a72e-482d-a65a-075d0b4c1f73}</ProjectGuid>
+    <ProjectGuid>{e133bc8d-e38e-44c8-b529-76a014055a97}</ProjectGuid>
     <RootNamespace>Pleiades</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -30,27 +30,27 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -72,49 +72,43 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)bin\$(PlatformTarget)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)int\$(PlatformTarget)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
-    <CodeAnalysisRuleSet>MixedRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <OutDir>$(SolutionDir)bin\$(PlatformTarget)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)int\$(PlatformTarget)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\$(PlatformTarget)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)int\$(PlatformTarget)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\$(PlatformTarget)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)int\$(PlatformTarget)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NOMINMAX;_WINDOWS;_USRDLL;WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;WIN32;_DEBUG;PLEIADES_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <EnableModules>false</EnableModules>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SG_LIBRARIES)Includes\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalBMIDirectories>
-      </AdditionalBMIDirectories>
-      <AdditionalHeaderUnitDependencies>
-      </AdditionalHeaderUnitDependencies>
-      <AdditionalModuleDependencies>
-      </AdditionalModuleDependencies>
-      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
-      <TranslateIncludes>false</TranslateIncludes>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <LargeAddressAware>true</LargeAddressAware>
       <AdditionalLibraryDirectories>$(SG_LIBRARIES)Binaries\asmjit\$(PlatformTarget)\$(Configuration)\;$(SG_LIBRARIES)Binaries\imgui\$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>asmjit.lib;imgui.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>imgui.lib;asmjit.lib;d3d9.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -123,23 +117,13 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NOMINMAX;_WINDOWS;_USRDLL;WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;WIN32;NDEBUG;PLEIADES_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <TreatWarningAsError>true</TreatWarningAsError>
-      <EnableModules>false</EnableModules>
-      <LanguageStandard_C>Default</LanguageStandard_C>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SG_LIBRARIES)Includes\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalBMIDirectories>
-      </AdditionalBMIDirectories>
-      <AdditionalHeaderUnitDependencies>
-      </AdditionalHeaderUnitDependencies>
-      <AdditionalModuleDependencies>
-      </AdditionalModuleDependencies>
-      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
-      <TranslateIncludes>false</TranslateIncludes>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
     </ClCompile>
     <Link>
@@ -148,42 +132,29 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalDependencies>asmjit.lib;imgui.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SG_LIBRARIES)Binaries\asmjit\$(PlatformTarget)\$(Configuration)\;$(SG_LIBRARIES)Binaries\imgui\$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <Profile>true</Profile>
-      <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <AdditionalDependencies>imgui.lib;asmjit.lib;d3d9.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NOMINMAX;_WINDOWS;_USRDLL;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;_DEBUG;PLEIADES_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <EnableModules>false</EnableModules>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SG_LIBRARIES)Includes\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalBMIDirectories>
-      </AdditionalBMIDirectories>
-      <AdditionalHeaderUnitDependencies>
-      </AdditionalHeaderUnitDependencies>
-      <AdditionalModuleDependencies>
-      </AdditionalModuleDependencies>
-      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
-      <TranslateIncludes>false</TranslateIncludes>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>asmjit.lib;imgui.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SG_LIBRARIES)Binaries\asmjit\$(PlatformTarget)\$(Configuration)\;$(SG_LIBRARIES)Binaries\imgui\$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>imgui.lib;asmjit.lib;d3d9.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -192,23 +163,13 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NOMINMAX;_WINDOWS;_USRDLL;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;NDEBUG;PLEIADES_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <TreatWarningAsError>true</TreatWarningAsError>
-      <EnableModules>false</EnableModules>
-      <LanguageStandard_C>Default</LanguageStandard_C>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SG_LIBRARIES)Includes\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalBMIDirectories>
-      </AdditionalBMIDirectories>
-      <AdditionalHeaderUnitDependencies>
-      </AdditionalHeaderUnitDependencies>
-      <AdditionalModuleDependencies>
-      </AdditionalModuleDependencies>
-      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
-      <TranslateIncludes>false</TranslateIncludes>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
     </ClCompile>
     <Link>
@@ -217,101 +178,77 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>asmjit.lib;imgui.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SG_LIBRARIES)Binaries\asmjit\$(PlatformTarget)\$(Configuration)\;$(SG_LIBRARIES)Binaries\imgui\$(PlatformTarget)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>imgui.lib;asmjit.lib;d3d9.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="console\Manager.cpp" />
+    <ClCompile Include="detours\CallContext.cpp" />
+    <ClCompile Include="detours\HookInstance.cpp" />
+    <ClCompile Include="detours\HooksManager.cpp" />
+    <ClCompile Include="detours\msdetour\creatwth.cpp" />
+    <ClCompile Include="detours\msdetour\detours.cpp" />
+    <ClCompile Include="detours\msdetour\disasm.cpp" />
+    <ClCompile Include="detours\msdetour\disolarm.cpp" />
+    <ClCompile Include="detours\msdetour\disolarm64.cpp" />
+    <ClCompile Include="detours\msdetour\disolia64.cpp" />
+    <ClCompile Include="detours\msdetour\disolx64.cpp" />
+    <ClCompile Include="detours\msdetour\disolx86.cpp" />
+    <ClCompile Include="detours\msdetour\image.cpp" />
+    <ClCompile Include="detours\msdetour\modules.cpp" />
+    <ClCompile Include="detours\SigBuilder.cpp" />
+    <ClCompile Include="detours\TypeTable.cpp" />
     <ClCompile Include="dllmain.cpp" />
-    <ClCompile Include="Impl\Console\config.cpp" />
-    <ClCompile Include="Impl\ImGui\Backends\imgui_impl_dx9.cpp" />
-    <ClCompile Include="Impl\ImGui\Backends\imgui_impl_win32.cpp" />
-    <ClCompile Include="Impl\ImGui\imgui_endscene_h.cpp" />
-    <ClCompile Include="Impl\ImGui\imgui_shared.cpp" />
-    <ClCompile Include="Impl\ImGui\imgui.cpp" />
-    <ClCompile Include="Impl\ImGui\Render\Compiled_Fonts\Arimo_Medium.cpp" />
-    <ClCompile Include="Impl\ImGui\Render\Compiled_Fonts\FontAwesome900_Solid.cpp" />
-    <ClCompile Include="Impl\ImGui\Render\Console\Commands\clear.cpp" />
-    <ClCompile Include="Impl\ImGui\Render\Console\Commands\exec.cpp" />
-    <ClCompile Include="Impl\ImGui\Render\Console\Commands\help.cpp" />
-    <ClCompile Include="Impl\ImGui\Render\Console\Commands\find.cpp" />
-    <ClCompile Include="Impl\ImGui\Render\Console\Console.cpp" />
-    <ClCompile Include="Impl\ImGui\Render\Logger\Filter.cpp" />
-    <ClCompile Include="Impl\ImGui\Render\Logger\JsInfo.cpp" />
-    <ClCompile Include="Impl\ImGui\Render\Logger\Logger.cpp" />
-    <ClCompile Include="Impl\ImGui\Render\MainRenderer.cpp" />
-    <ClCompile Include="Impl\ImGui\Render\PluginManager\PlInfo.cpp" />
-    <ClCompile Include="Impl\ImGui\Render\PluginManager\PluginManager.cpp" />
-    <ClCompile Include="Impl\ImGui\Render\Profiler\Draw.cpp" />
-    <ClCompile Include="Impl\ImGui\Render\Profiler\Hierachy.cpp" />
-    <ClCompile Include="Impl\ImGui\Render\Profiler\ImPlot\implot.cpp" />
-    <ClCompile Include="Impl\ImGui\Render\Profiler\ImPlot\implot_demo.cpp" />
-    <ClCompile Include="Impl\ImGui\Render\Profiler\ImPlot\implot_items.cpp" />
-    <ClCompile Include="Impl\ImGui\Render\Profiler\PlotBars.cpp" />
-    <ClCompile Include="Impl\ImGui\Render\Profiler\Profiler.cpp" />
-    <ClCompile Include="Impl\ImGui\Render\Profiler\SectionHandler.cpp" />
-    <ClCompile Include="Impl\ImGui\Render\Profiler\Sorted.cpp" />
-    <ClCompile Include="Impl\ImGui\Render\PropManager\PropManager.cpp" />
-    <ClCompile Include="Impl\ImGui\Render\Themes\Themes.cpp" />
-    <ClCompile Include="Impl\Library\GameData.cpp" />
-    <ClCompile Include="Impl\DetoursMan\HooksManager.cpp" />
-    <ClCompile Include="Impl\DetoursMan\CallContext.cpp" />
-    <ClCompile Include="Impl\DetoursMan\HookInstance.cpp" />
-    <ClCompile Include="Impl\DetoursMan\MSDetour\creatwth.cpp" />
-    <ClCompile Include="Impl\DetoursMan\MSDetour\detours.cpp" />
-    <ClCompile Include="Impl\DetoursMan\MSDetour\disasm.cpp" />
-    <ClCompile Include="Impl\DetoursMan\MSDetour\disolarm.cpp" />
-    <ClCompile Include="Impl\DetoursMan\MSDetour\disolarm64.cpp" />
-    <ClCompile Include="Impl\DetoursMan\MSDetour\disolia64.cpp" />
-    <ClCompile Include="Impl\DetoursMan\MSDetour\disolx64.cpp" />
-    <ClCompile Include="Impl\DetoursMan\MSDetour\disolx86.cpp" />
-    <ClCompile Include="Impl\DetoursMan\MSDetour\image.cpp" />
-    <ClCompile Include="Impl\DetoursMan\MSDetour\modules.cpp" />
-    <ClCompile Include="Impl\DetoursMan\SigBuilder.cpp" />
-    <ClCompile Include="Impl\DetoursMan\TypeTable.cpp" />
-    <ClCompile Include="Impl\Interfaces\EventManager.cpp" />
-    <ClCompile Include="Impl\Interfaces\InterfaceSys.cpp" />
-    <ClCompile Include="Impl\Plugins\PluginContext.cpp" />
-    <ClCompile Include="Impl\Library\LibrarySys.cpp" />
-    <ClCompile Include="Impl\Plugins\PluginManager.cpp" />
-    <ClCompile Include="Impl\Library\MemoryModule.cpp" />
-    <ClCompile Include="Impl\Interfaces\Logger.cpp" />
+    <ClCompile Include="imgui\backends\compiled_fonts\Arimo_Medium.cpp" />
+    <ClCompile Include="imgui\backends\compiled_fonts\FontAwesome900_Solid.cpp" />
+    <ClCompile Include="imgui\backends\console.cpp" />
+    <ClCompile Include="imgui\backends\dx9\Manager.cpp" />
+    <ClCompile Include="imgui\frontends\console\commands\clear.cpp" />
+    <ClCompile Include="imgui\frontends\console\commands\exec.cpp" />
+    <ClCompile Include="imgui\frontends\console\commands\find.cpp" />
+    <ClCompile Include="imgui\frontends\console\commands\help.cpp" />
+    <ClCompile Include="imgui\frontends\console\Console.cpp" />
+    <ClCompile Include="imgui\backends\renderer.cpp" />
+    <ClCompile Include="imgui\frontends\themes\Themes.cpp" />
+    <ClCompile Include="imgui\imgui.cpp" />
+    <ClCompile Include="imgui\imgui_shared.cpp" />
+    <ClCompile Include="library\Manager.cpp" />
+    <ClCompile Include="library\Module.cpp" />
+    <ClCompile Include="logs\Logger.cpp" />
+    <ClCompile Include="events\Manager.cpp" />
+    <ClCompile Include="plugins\GameData.cpp" />
+    <ClCompile Include="plugins\Manager.cpp" />
+    <ClCompile Include="plugins\Plugins.cpp" />
+    <ClCompile Include="plugins\Context.cpp" />
+    <ClCompile Include="imgui\backends\dx9\imgui_impl_dx9.cpp" />
+    <ClCompile Include="imgui\backends\win32\imgui_impl_win32.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Impl\Console\config.hpp" />
-    <ClInclude Include="Impl\ImGui\Defines.hpp" />
-    <ClInclude Include="Impl\ImGui\imgui_iface.hpp" />
-    <ClInclude Include="Impl\ImGui\Render\Console\Console.hpp" />
-    <ClInclude Include="Impl\ImGui\Render\Logger\Logger.hpp" />
-    <ClInclude Include="Impl\ImGui\Render\PluginManager\PluginManager.hpp" />
-    <ClInclude Include="Impl\ImGui\Render\Profiler\ImPlot\implot.h" />
-    <ClInclude Include="Impl\ImGui\Render\Profiler\ImPlot\implot_internal.h" />
-    <ClInclude Include="Impl\ImGui\Render\Profiler\Profiler.hpp" />
-    <ClInclude Include="Impl\ImGui\Render\render.hpp" />
-    <ClInclude Include="Impl\ImGui\Render\Themes\Themes.hpp" />
-    <ClInclude Include="Impl\Interfaces\Profiler.hpp" />
-    <ClInclude Include="Impl\Library\GameData.hpp" />
-    <ClInclude Include="Impl\DetoursMan\HooksManager.hpp" />
-    <ClInclude Include="Impl\DetoursMan\CallContext.hpp" />
-    <ClInclude Include="Impl\DetoursMan\Detour.hpp" />
-    <ClInclude Include="Impl\DetoursMan\HookInstance.hpp" />
-    <ClInclude Include="Impl\DetoursMan\MSDetour\detours.hpp" />
-    <ClInclude Include="Impl\DetoursMan\MSDetour\detver.hpp" />
-    <ClInclude Include="Impl\DetoursMan\SigBuilder.hpp" />
-    <ClInclude Include="Impl\DetoursMan\TypeTable.hpp" />
-    <ClInclude Include="Impl\Interfaces\EventManager.hpp" />
-    <ClInclude Include="Impl\Plugins\PluginContext.hpp" />
-    <ClInclude Include="Impl\Plugins\PluginManager.hpp" />
-    <ClInclude Include="Impl\Interfaces\Logger.hpp" />
-    <ClInclude Include="Impl\Library\LibrarySys.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Natvis Include="asmjit.natvis" />
-    <Natvis Include="imgui.natvis" />
-    <Natvis Include="Json.natvis" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="imgui.natstepfilter" />
+    <ClInclude Include="console\Manager.hpp" />
+    <ClInclude Include="detours\CallContext.hpp" />
+    <ClInclude Include="detours\Detour.hpp" />
+    <ClInclude Include="detours\HookInstance.hpp" />
+    <ClInclude Include="detours\HooksManager.hpp" />
+    <ClInclude Include="detours\msdetour\detours.h" />
+    <ClInclude Include="detours\msdetour\detver.h" />
+    <ClInclude Include="detours\SigBuilder.hpp" />
+    <ClInclude Include="detours\TypeTable.hpp" />
+    <ClInclude Include="imgui\backends\dx9\Manager.hpp" />
+    <ClInclude Include="imgui\backends\States.hpp" />
+    <ClInclude Include="imgui\frontends\console\Console.hpp" />
+    <ClInclude Include="imgui\frontends\renderer.hpp" />
+    <ClInclude Include="imgui\frontends\themes\Themes.hpp" />
+    <ClInclude Include="imgui\imgui_iface.hpp" />
+    <ClInclude Include="library\Manager.hpp" />
+    <ClInclude Include="library\Module.hpp" />
+    <ClInclude Include="logs\Logger.hpp" />
+    <ClInclude Include="events\Manager.hpp" />
+    <ClInclude Include="plugins\GameData.hpp" />
+    <ClInclude Include="plugins\Manager.hpp" />
+    <ClInclude Include="plugins\Context.hpp" />
+    <ClInclude Include="imgui\backends\dx9\imgui_impl_dx9.hpp" />
+    <ClInclude Include="imgui\backends\win32\imgui_impl_win32.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
