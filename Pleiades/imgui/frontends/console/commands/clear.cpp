@@ -1,20 +1,22 @@
 #include "../Console.hpp"
+#include "console/Manager.hpp"
 
 PX_COMMAND(
 	clear,
-R"(
-	Clear console output.
-	USAGE:
-		] clear [flags]
+R"(Clear console output.
+USAGE:
+	] clear [flags]...
 
-	-c <count=0>:	Number of entries to erase from console.
-	-h:				Clear history instead.
-)"
+FLAGS:
+	-h, --help		  show help message.
+	-c, --count		Number of entries to erase from console.
+	--history		   Clear history instead.)",
+	{
+		px::cmd_mask{ "help", 'h', false, true },
+		px::cmd_mask{ "count", 'c' },
+		px::cmd_mask{ "history", 'h', false, true }
+	}
 )
 {
-	size_t count = args.get_arg("c", 0);
-	bool history_only = args.contains("h");
-	px::console_manager.Clear(count, history_only);
-
-	return nullptr;
+	px::console_manager.Clear(exec_info.args.get<size_t>("count", 0), exec_info.args.contains("history"));
 }

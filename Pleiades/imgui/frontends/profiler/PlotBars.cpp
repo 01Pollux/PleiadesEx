@@ -1,10 +1,9 @@
 
 #include <array>
-#include "Profiler.hpp"
 #include "ImPlot/implot.h"
 #include "ImPlot/implot_internal.h"
+#include "Profiler.hpp"
 
-PX_NAMESPACE_BEGIN();
 
 void ImGuiProfilerInstance::DrawPlotBars(entry_container& entries)
 {
@@ -48,30 +47,30 @@ void ImGuiProfilerInstance::DrawPlotBars(entry_container& entries)
     }
 
     // First draw our entries in seperate child for drag&drop
-    if (ImGui::BeginChild("DND Child", { 120, -FLT_MIN }))
+    if (imcxx::window_child dnd_child{ "DND Child", { 120, -FLT_MIN } })
     {
-        if (ImGui::BeginCombo("##TIME", time_types[static_cast<size_t>(current_view)].first, ImGuiComboFlags_NoArrowButton))
+        if (imcxx::combo_box time_select{ "##TIME", time_types[static_cast<size_t>(current_view)].first, ImGuiComboFlags_NoArrowButton })
         {
             for (auto& type : time_types)
             {
                 if (ImGui::Selectable(type.first, type.second == current_view))
                     current_view = type.second;
             }
-            ImGui::EndCombo();
         }
 
-        ImGui::DragFloat("##Spacing", &plot_spacing, .1f, 0.f, 0.f, "%.4f");
+        imcxx::drag::call("##Spacing", &plot_spacing, .1f, 0.f, 0.f, "%.4f");
 
         for (auto entry = entries_begin; entry != entries_end; ++entry)
         {
             // Don't allow active graphs to the drag&drop list
-            ImGui::PushID(&*entry);
-            ImPlot::ItemIcon(entry->color);
-            ImGui::SameLine();
-            ImGui::Selectable(entry->name.c_str(), false, ImGuiSelectableFlags_None, { 100.f, 0.f });
-            ImGui::PopID();
+            {
+                imcxx::shared_item_id entry_id(std::addressof(*entry));
+                ImPlot::ItemIcon(entry->color);
+                ImGui::SameLine();
+                ImGui::Selectable(entry->name.c_str(), false, ImGuiSelectableFlags_None, { 100.f, 0.f });
+            }
 
-            if (ImGui::BeginPopupContextItem())
+            if (imcxx::popup stack_popup{ imcxx::popup::context_item{} })
             {
                 if (ImGui::Selectable("Stack Trace"))
                 {
@@ -82,11 +81,9 @@ void ImGuiProfilerInstance::DrawPlotBars(entry_container& entries)
 
                 if (ImGui::Selectable("Delete"))
                 {
-                    entry = profiler::manager::EraseChildrens(entries, entry);
+                    entry = px::profiler::manager::EraseChildrens(entries, entry);
                     ImGui::CloseCurrentPopup();
                 }
-
-                ImGui::EndPopup();
 
                 if (entry == entries.end())
                     break;
@@ -94,13 +91,36 @@ void ImGuiProfilerInstance::DrawPlotBars(entry_container& entries)
         }
     }
 
-    ImGui::EndChild();
     ImGui::SameLine();
 
-
-
     {
-        if (ImPlot::BeginPlot("##PLOT", "Calls", time_types[static_cast<size_t>(current_view)].first, { -FLT_MIN, -FLT_MIN }, ImPlotFlags_None, ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoLabel))
+        struct safe_plot
+        {
+            safe_plot(const char* time_view) : 
+                is_open(ImPlot::BeginPlot(
+                    "##PLOT", 
+                    "Calls", 
+                    time_view,
+                    { -FLT_MIN, -FLT_MIN }, 
+                    ImPlotFlags_None, ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoLabel
+                ))
+            {}
+
+            ~safe_plot()
+            {
+                if (is_open)
+                    ImPlot::EndPlot();
+            }
+
+            constexpr operator bool() const noexcept
+            {
+                return is_open;
+            }
+
+            bool is_open : 1;
+        };
+
+        if (safe_plot plot_draw{ time_types[static_cast<size_t>(current_view)].first })
         {
             using namespace std::chrono_literals;
             struct data_t
@@ -209,10 +229,6 @@ void ImGuiProfilerInstance::DrawPlotBars(entry_container& entries)
                     (plotlines.size() - 1) * 100
                 );
             }
-
-            ImPlot::EndPlot();
         }
     }
 }
-
-PX_NAMESPACE_END();

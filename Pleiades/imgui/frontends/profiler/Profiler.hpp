@@ -1,13 +1,12 @@
 #pragma once
 
+#include "imgui/backends/States.hpp"
 #include <px/profiler.hpp>
-#include "../../Render/render.hpp"
 
-PX_NAMESPACE_BEGIN();
 
 struct ImGuiProfilerInstance
 {
-    using entry_container = profiler::types::entry_container;
+    using entry_container = px::profiler::types::entry_container;
 
     enum class draw_type : uint8_t
     {
@@ -29,8 +28,8 @@ struct ImGuiProfilerInstance
     {
         struct entry_info
         {
-            const profiler::types::clock_duration duration;
-            const std::unique_ptr<profiler::types::stacktrace>& stack_info;
+            const px::profiler::types::clock_duration duration;
+            const std::unique_ptr<px::profiler::types::stacktrace>& stack_info;
         };
 
         struct entry_container
@@ -40,7 +39,10 @@ struct ImGuiProfilerInstance
 
             std::list<entry_info> entries;
             const std::string& name;
-            profiler::types::clock_duration min{ profiler::types::clock_duration::max() }, max{ profiler::types::clock_duration::min() }, avg_minmax{ }, avg_total{ };
+            px::profiler::types::clock_duration 
+                min{ px::profiler::types::clock_duration::max() }, 
+                max{ px::profiler::types::clock_duration::min() }, 
+                avg_minmax{ }, avg_total{ };
 
             entry_container(size_t stack_offset, const std::string& name) :
                 stack_offset(stack_offset), name(name)
@@ -48,7 +50,7 @@ struct ImGuiProfilerInstance
         };
         using container_type = std::vector<entry_container>;
 
-        void Update(const profiler::types::entry_container& infos);
+        void Update(const px::profiler::types::entry_container& infos);
 
         void Clear() noexcept
         {
@@ -127,7 +129,7 @@ struct ImGuiProfilerInstance
     void DrawPlotBars(entry_container&);
 
 
-    profiler::manager* m_Instance{ };
+    px::profiler::manager* m_Instance{ };
     std::map<std::string, section_info> m_Sections;
     bool m_NeedReload;
 
@@ -168,7 +170,7 @@ public:
         /// <param name="entries">pointer to entries if the entry is erasable</param>
         /// <param name="current_entry">pointer to to current entry if it's erables</param>
         void SetPopupInfo(
-            const profiler::types::stacktrace& stacktrace,
+            const px::profiler::types::stacktrace& stacktrace,
             ImGuiProfilerInstance::entry_container* entries,
             ImGuiProfilerInstance::entry_container::iterator* current_entry
         );
@@ -185,9 +187,8 @@ public:
     static inline StackTracePopup_t StackTracePopup;
 
 private:
+    // TODO: Multiple instances of profilers?
     /*using map_type = std::map<std::string, ImGuiProfilerInstance>;
     map_type m_ProfilerInstances;*/
     ImGuiProfilerInstance m_ProfilerInstance;
 };
-
-PX_NAMESPACE_END();

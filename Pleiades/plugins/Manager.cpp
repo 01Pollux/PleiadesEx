@@ -11,6 +11,7 @@
 #include "imgui/imgui_iface.hpp"	// imgui_iface
 #include "console/Manager.hpp"		// console_manager
 
+
 px::version DLLManager::GetHostVersion()
 {
 	constexpr px::version hostVersion{ "1.5.2.0" };
@@ -54,7 +55,7 @@ bool DLLManager::BasicInit()
 	if (!px::imgui_iface.LoadImGui(maincfg))
 		return false;
 
-	px::ConCommand::Init(nullptr, &px::console_manager);
+	px::console_manager.AddCommands();
 
 	auto plugins = maincfg.find("plugins");
 	if (plugins != maincfg.end() && plugins->is_array() && !plugins->empty())

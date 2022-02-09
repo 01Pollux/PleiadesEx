@@ -16,8 +16,6 @@
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-void Hook_Test_Recursive();
-
 namespace renderer
 {
 	struct d3dx9_state
@@ -79,34 +77,28 @@ namespace renderer
 		if (d3dx9_state::RenderDevice != pArgs->get<IDirect3DDevice9*>(0))
 			return { };
 
-		ImGui_ImplDX9_NewFrame();
-		ImGui_ImplWin32_NewFrame();
-		ImGui::NewFrame();
-
-		if (global_state::IsOpen)
+		
 		{
-			constexpr ImGuiWindowFlags main_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar;
+			imcxx::frame imgui_frame(
+				[]()
+				{
+					ImGui_ImplDX9_NewFrame();
+					ImGui_ImplWin32_NewFrame();
+				}
+			);
 
-			ImGui::SetNextWindowSize({ 1400, 760 }, ImGuiCond_FirstUseEver);
-
-			if (ImGui::Begin("Pleiades", &global_state::IsOpen, main_flags))
-				global_state::Bridge.RenderAll();
-
-			ImGui::End();
-
-
-			if (ImGui::Begin("Hook Rec"))
+			if (global_state::IsOpen)
 			{
-				Hook_Test_Recursive();
-			}
+				constexpr ImGuiWindowFlags main_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar;
 
-			ImGui::End();
+				ImGui::SetNextWindowSize({ 1400, 760 }, ImGuiCond_FirstUseEver);
+
+				if (imcxx::window pleiades{ "Pleiades", &global_state::IsOpen, main_flags })
+					global_state::Bridge.RenderAll();
+			}
 		}
 
-		ImGui::EndFrame();
-
-		ImGui::Render();
-		ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
+		imcxx::render(ImGui_ImplDX9_RenderDrawData);
 
 		return { };
 	}
@@ -120,7 +112,7 @@ namespace renderer
 			ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 
 		ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam);
-		return global_state::IsOpen ? TRUE : DefWindowProc(hWnd, uMsg, wParam, lParam);
+		return global_state::IsOpen ? TRUE : ::CallWindowProc(d3dx9_state::WndProcedure, hWnd, uMsg, wParam, lParam);
 	}
 
 	bool InitializeForDx9(const nlohmann::json& data)

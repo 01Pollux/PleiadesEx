@@ -31,12 +31,12 @@ namespace renderer
 				bool _Changed{ };
 				bool _SafeToClose{ };
 
-				void RenderInfo(PropManager_t& prop_manager){}
+				void RenderInfo(PropManager_t& prop_manager);
 
 				/// <summary>
 				/// Send Popup for shutdown for saving/cancelling/discarding current data
 				/// </summary>
-				[[nodiscard]] bool DisplayPopupShutown(key_type name, PropManager_t& prop_manager) { return false; }
+				[[nodiscard]] bool DisplayPopupShutown(key_type name, PropManager_t& prop_manager);
 			};
 
 			using container_type = std::multimap<key_type, CallbackState>;
@@ -44,13 +44,13 @@ namespace renderer
 
 			void RenderAll();
 			// Props Manager
-			void RenderPropManager(){}
+			void RenderPropManager();
 			// Plugins Manager
-			void RenderPluginManager(){}
+			void RenderPluginManager();
 			// Logger
-			void RenderLogger(){}
+			void RenderLogger();
 			// Profiler
-			void RenderProfiler(){}
+			void RenderProfiler();
 			// Console
 			void RenderConsole();
 			// About
@@ -69,7 +69,7 @@ namespace renderer
 				/// <summary>
 				/// Loop through 'CallbackProps', find the first one that has changed
 				/// </summary>
-				container_iter GetFirstChanged() { return CallbackProps.end(); }
+				container_iter GetFirstChanged();
 			};
 
 			PropManager_t PropManager;

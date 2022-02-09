@@ -1,14 +1,10 @@
 
-#include <filesystem>
-#include <fstream>
-#include <px/version_fmt.hpp>
-
-#include "Impl/Library/LibrarySys.hpp"
-#include "Impl/Interfaces/Logger.hpp"
+#include "library/Manager.hpp"
+#include "logs/Logger.hpp"
 
 #include "PluginManager.hpp"
+#include "imgui/backends/States.hpp"
 
-PX_NAMESPACE_BEGIN();
 
 static void DrawPluginStateToImGui(PluginState state);
 
@@ -22,63 +18,57 @@ NLOHMANN_JSON_SERIALIZE_ENUM(
 });
 
 
-void ImGui_BrdigeRenderer::RenderPluginManager()
-{
-	static ImGui_PluginManager manager(px::imgui_iface.GetWindowName());
-
-	ImGui::Text(ICON_FA_INFO_CIRCLE " Host Name: %s", manager.HostName.data());
-	ImGui::Text(ICON_FA_INFO_CIRCLE " Host Version: %i.%i.%i.%i", PlVersionFmt(manager.HostVer));
-
-	if (ImGui::Button(ICON_FA_REDO " Refresh"))
-		manager.LoadPlugins();
-
-	manager.DrawPluginDesign();
-}
-
-
 void ImGui_PluginManager::LoadPlugins()
 {
 	m_PlManSection.Plugins.clear();
 
-	char path[MAX_PATH]{ };
-	if (!px::lib_manager.GoToDirectory(px::PlDirType::Plugins, nullptr, path, std::ssize(path)))
+	try
+	{
+		std::string path = px::lib_manager.GoToDirectory(px::PlDirType::Plugins);
+		if (path.empty())
+		{
+			m_PlManSection.reset();
+			return;
+		}
+
+		bool ignored_this_plugin = false;
+		namespace fs = std::filesystem;
+		for (auto& dir : fs::directory_iterator(path))
+		{
+			if (!dir.is_directory())
+				continue;
+
+			std::string file = dir.path().stem().string();
+			if (!ignored_this_plugin && file.find("ImGui Interface") != std::string::npos)
+			{
+				ignored_this_plugin = true;
+				continue;
+			}
+
+			px::IPlugin* pl = px::plugin_manager.FindPlugin(file);
+
+			ImGuiPlInfo info{
+				std::move(file),
+				pl,
+				{ },
+				pl ? (pl->IsPluginPaused() ? PluginState::Paused : PluginState::Loaded) : PluginState::Unloaded
+			};
+
+			m_PlManSection.Plugins.emplace_back(std::move(info));
+		}
+
+		m_PlManSection.Plugins.shrink_to_fit();
+		m_PlManSection.reset();
+	}
+	catch (const std::exception& ex)
 	{
 		PX_LOG_MESSAGE(
 			PX_MESSAGE("Exception reported while loading Packs"),
-			PX_LOGARG("Exception", path)
+			PX_LOGARG("Exception", ex.what())
 		);
 		m_PlManSection.reset();
 		return;
 	}
-
-	bool ignored_this_plugin = false;
-	namespace fs = std::filesystem;
-	for (auto& dir : fs::directory_iterator(path))
-	{
-		if (!dir.is_directory())
-			continue;
-
-		std::string file = dir.path().stem().string();
-		if (!ignored_this_plugin && file.find("ImGui Interface") != std::string::npos)
-		{
-			ignored_this_plugin = true;
-			continue;
-		}
-
-		IPlugin* pl = px::plugin_manager.FindPlugin(file);
-
-		ImGuiPlInfo info{
-			std::move(file),
-			pl,
-			{ },
-			pl ? (pl->IsPluginPaused() ? PluginState::Paused : PluginState::Loaded) : PluginState::Unloaded
-		};
-
-		m_PlManSection.Plugins.emplace_back(std::move(info));
-	}
-
-	m_PlManSection.Plugins.shrink_to_fit();
-	m_PlManSection.reset();
 }
 
 
@@ -86,12 +76,12 @@ void ImGui_PluginManager::DrawPluginDesign()
 {
 	using enum PluginState;
 
-	if (ImGui::BeginChild("Current Props", { 385.f, 0.f }, true))
+	if (imcxx::window_child cur_props{ "Current Props", { 385.f, 0.f }, true })
 	{
 		ImGui::SetNextItemWidth(ImGui::CalcTextSize("A").x * 15);
 
 		static bool allow_states[static_cast<size_t>(PluginState::Failed) + 1]{ true, true, true, true };
-		if (ImGui::BeginCombo("##States", "States", ImGuiComboFlags_::ImGuiComboFlags_PopupAlignLeft))
+		if (imcxx::combo_box states{ "##States", "States", ImGuiComboFlags_::ImGuiComboFlags_PopupAlignLeft })
 		{
 			size_t i = 0;
 			for (auto& type : {
@@ -101,9 +91,8 @@ void ImGui_PluginManager::DrawPluginDesign()
 				PlStateToString(PluginState::Failed)
 			})
 				ImGui::Selectable(type, &allow_states[i++], ImGuiSelectableFlags_DontClosePopups);
-
-			ImGui::EndCombo();
 		}
+
 		ImGui::SameLine(); m_PlManSection.Filter.Draw("", -25.f);
 		ImGui::SameLineHelp("Filter (inc, -exc)");
 
@@ -124,14 +113,14 @@ void ImGui_PluginManager::DrawPluginDesign()
 				ImGui::SetItemDefaultFocus();
 		}
 
-		ImGui::EndChild();
-		ImGui::SameLine();
 	}
 
+	ImGui::SameLine();
 	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.f);
-	ImGui::BeginGroup();
+	imcxx::group config_group;
+
 	{
-		if (ImGui::BeginChild("Current Configs", { 0, -ImGui::GetFrameHeightWithSpacing() }))
+		if (imcxx::window_child cur_config{ "Current Configs", { 0, -ImGui::GetFrameHeightWithSpacing() } })
 		{
 			if (m_PlManSection.Current != m_PlManSection.Plugins.end())
 			{
@@ -140,11 +129,13 @@ void ImGui_PluginManager::DrawPluginDesign()
 
 				const float textwidth = ImGui::CalcTextSize("A").x * 14.2f;
 
-				if (ImGui::BeginTable("##Plugins Info", 2, ImGuiTableFlags_Borders))
+				if (imcxx::table info_table{ "##Plugins Info", 2, ImGuiTableFlags_Borders })
 				{
-					ImGui::TableSetupColumn(nullptr, ImGuiTableColumnFlags_WidthFixed, textwidth);
-					ImGui::TableSetupColumn(nullptr, ImGuiTableColumnFlags_WidthStretch);
-					ImGui::TableHeadersRow();
+					info_table.setup(
+						imcxx::table::setup_no_row{}, 
+						imcxx::table::setup_info{ nullptr, ImGuiTableColumnFlags_WidthFixed, textwidth },
+						imcxx::table::setup_info{ nullptr, ImGuiTableColumnFlags_WidthStretch }
+					);
 
 					for (auto& info : std::array{
 							std::pair{ "Author",		plinfo.Plugin ? plinfo.Plugin->GetPluginInfo()->m_Author : "???" },
@@ -152,13 +143,13 @@ void ImGui_PluginManager::DrawPluginDesign()
 							std::pair{ "Description",	plinfo.Plugin ? plinfo.Plugin->GetPluginInfo()->m_Description : "???" }
 						 })
 					{
-						if (ImGui::TableNextColumn())
+						if (info_table.next_column())
 							ImGui::TextUnformatted(info.first);
-						if (ImGui::TableNextColumn())
+						if (info_table.next_column())
 							ImGui::TextUnformatted(info.second);
 					}
 
-					if (ImGui::TableNextColumn())
+					if (info_table.next_column())
 						ImGui::TextUnformatted("Version");
 					{
 						const px::version& ver = plinfo.Plugin ? plinfo.Plugin->GetPluginInfo()->m_Version : px::version{ };
@@ -169,13 +160,11 @@ void ImGui_PluginManager::DrawPluginDesign()
 							ImVec4{ 1.f, 0.f, 0.f, 1.f } // Failed / Unloaded
 						};
 
-						if (ImGui::TableNextColumn())
+						if (info_table.next_column())
 							ImGui::Text(plinfo.Plugin ? "%i.%i.%i.%i" : "???", PlVersionFmt(ver));
 
 						DrawPluginStateToImGui(plinfo.State);
 					}
-
-					ImGui::EndTable();
 				}
 
 				// if the plugin isn't loaded nor paused
@@ -184,9 +173,6 @@ void ImGui_PluginManager::DrawPluginDesign()
 			}
 		}
 	}
-
-	ImGui::EndChild();
-	ImGui::EndGroup();
 }
 
 void DrawPluginStateToImGui(PluginState state)
@@ -204,5 +190,3 @@ void DrawPluginStateToImGui(PluginState state)
 		ImGui::TextColored(clr, PlStateToString(state));
 	}
 }
-
-PX_NAMESPACE_END();

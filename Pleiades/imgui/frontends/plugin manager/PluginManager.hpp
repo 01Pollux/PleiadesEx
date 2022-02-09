@@ -1,10 +1,7 @@
 #pragma once
 
-#include "../render.hpp"
-#include "../../imgui_iface.hpp"
-#include "Impl/Plugins/PluginManager.hpp"
-
-PX_NAMESPACE_BEGIN();
+#include "imgui/imgui_iface.hpp"
+#include "plugins/Manager.hpp"
 
 enum class PluginState : char8_t
 {
@@ -16,10 +13,10 @@ enum class PluginState : char8_t
 
 struct ImGuiPlInfo
 {
-	std::string PluginName;
-	IPlugin*	Plugin{ };
+	std::string		PluginName;
+	px::IPlugin*	Plugin{ };
 	nlohmann::json	Logs;
-	PluginState State{ PluginState::Unloaded };
+	PluginState		State{ PluginState::Unloaded };
 
 	void Load();
 	void Unload();
@@ -87,5 +84,3 @@ constexpr const char* PlStateToString(PluginState state)
 	default: return "";
 	}
 }
-
-PX_NAMESPACE_END();

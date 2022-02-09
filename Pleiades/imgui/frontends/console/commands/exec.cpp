@@ -1,18 +1,18 @@
-#include "../Console.hpp"
 #include "library/Manager.hpp"
+#include "../Console.hpp"
+#include "console/Manager.hpp"
 
 PX_COMMAND(
 	exec,
-R"(
-	Execute a config file.
+R"(Execute a config file.
 	USAGE:
 		] exec <filename>.cfg
 )"
 )
 {
-	if (args.has_val())
+	if (!exec_info.value.empty())
 	{
-		for (auto& config_name : args.get_val<std::vector<std::string>>())
+		for (auto& config_name : exec_info.value.split<std::string_view>())
 		{
 			std::ifstream file(std::format("{}/{}.cfg", LibraryManager::ConfigDir, config_name));
 			if (file)
@@ -52,5 +52,4 @@ R"(
 			}
 		}
 	}
-	return nullptr;
 }

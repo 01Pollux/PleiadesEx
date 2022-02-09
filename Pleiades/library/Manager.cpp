@@ -203,50 +203,45 @@ std::string LibraryManager::GoToDirectory(px::PlDirType type, std::string_view e
 	namespace fs = std::filesystem;
 	std::string path;
 
-	try
+	auto tmp_path = fs::current_path();
+	using PlDirType = px::PlDirType;
+
+	switch (type)
 	{
-		auto tmp_path = fs::current_path();
-		using PlDirType = px::PlDirType;
-
-		switch (type)
-		{
-		case PlDirType::Root:
-		{
-			break;
-		}
-		case PlDirType::Main:
-		{
-			tmp_path.append(LibraryManager::MainDir).append(extra_path);
-			break;
-		}
-		case PlDirType::Plugins:
-		{
-			tmp_path.append(LibraryManager::PluginsDir).append(extra_path);
-			break;
-		}
-		case PlDirType::Logs:
-		{
-			tmp_path.append(LibraryManager::LogsDir).append(extra_path);
-			break;
-		}
-		case PlDirType::Profiler:
-		{
-			tmp_path.append(LibraryManager::ProfilerDir).append(extra_path);
-			break;
-		}
-		case PlDirType::Sounds:
-		{
-			tmp_path.append(LibraryManager::SoundsDir).append(extra_path);
-			break;
-		}
-		[[unlikely]] default: return path;
-		}
-
-		if (fs::exists(tmp_path))
-			path.assign(tmp_path.string());
+	case PlDirType::Root:
+	{
+		break;
 	}
-	catch (...)
-	{}
+	case PlDirType::Main:
+	{
+		tmp_path.append(LibraryManager::MainDir).append(extra_path);
+		break;
+	}
+	case PlDirType::Plugins:
+	{
+		tmp_path.append(LibraryManager::PluginsDir).append(extra_path);
+		break;
+	}
+	case PlDirType::Logs:
+	{
+		tmp_path.append(LibraryManager::LogsDir).append(extra_path);
+		break;
+	}
+	case PlDirType::Profiler:
+	{
+		tmp_path.append(LibraryManager::ProfilerDir).append(extra_path);
+		break;
+	}
+	case PlDirType::Sounds:
+	{
+		tmp_path.append(LibraryManager::SoundsDir).append(extra_path);
+		break;
+	}
+	[[unlikely]] default: return path;
+	}
+
+	if (fs::exists(tmp_path))
+		path.assign(tmp_path.string());
 
 	return path;
 }

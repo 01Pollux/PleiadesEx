@@ -46,15 +46,24 @@ bool ImGuiInterface::LoadImGui(const nlohmann::json& cfg)
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	}
 
-	renderer::global_state::LoadFonts();
-	renderer::global_state::Bridge.ThemeManager.ReloadThemes();
-
+	try
 	{
+		renderer::global_state::LoadFonts();
+		renderer::global_state::Bridge.ThemeManager.ReloadThemes();
+		
 		auto iter = cfg.find("theme");
 		renderer::global_state::Bridge.ThemeManager.LoadTheme((iter == cfg.end() || !iter->is_string()) ? "" : *iter);
+
+		if (auto iter = cfg.find("tabs"); iter != cfg.end() && iter->is_number_integer())
+			renderer::global_state::Bridge.LoadTabs(iter->get<uint32_t>());
 	}
-	if (auto iter = cfg.find("tabs"); iter != cfg.end() && iter->is_number_integer())
-		renderer::global_state::Bridge.LoadTabs(iter->get<uint32_t>());
+	catch (const std::exception& ex)
+	{
+		PX_LOG_MESSAGE(
+			PX_MESSAGE("Exception reported while loading fonts/themes/tabs"),
+			PX_LOGARG("Exception", ex.what())
+		);
+	}
 
 	using RendererType = renderer::global_state::ImGui_BrdigeRenderer::RendererType;
 	using namespace std::string_view_literals;
@@ -67,9 +76,7 @@ bool ImGuiInterface::LoadImGui(const nlohmann::json& cfg)
 	})
 	{
 		if (!name.compare(*render_name))
-		{
 			renderer::global_state::Bridge.Type = type;
-		}
 	}
 
 	switch (renderer::global_state::Bridge.Type)

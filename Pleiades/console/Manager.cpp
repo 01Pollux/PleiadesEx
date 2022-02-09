@@ -1,44 +1,67 @@
 #include "plugins/Manager.hpp"
-#include "imgui/frontends/console/Console.hpp"
 #include "Manager.hpp"
 
 
-bool ConsoleManager::AddCommands(px::ConCommand* command)
+void ConsoleManager::AddCommands(
+    px::IPlugin* plugin,
+    px::con_command::entries_type::iterator begin,
+    px::con_command::entries_type::iterator end
+)
 {
-    px::IPlugin* plugin = command->plugin();
+    auto iter = std::find_if(
+        px::imgui_console.m_Commands.begin(),
+        px::imgui_console.m_Commands.end(),
+        [plugin](auto& wrap)
+        {
+            return wrap.Plugin == plugin;
+        }
+    );
+    if (iter == px::imgui_console.m_Commands.end())
+    {
+        std::vector<px::con_command*> entries;
+        entries.reserve(std::distance(begin, end));
+        while (begin != end)
+        {
+            entries.emplace_back(begin->second);
+            ++begin;
+        }
 
-	px::ConCommand* cmd = command;
-	while (cmd)
-	{
-		cmd->m_Plugin = plugin;
-		px::imgui_console.m_Commands.push_back(cmd);
-		cmd = std::exchange(cmd->m_NextCommand, nullptr);
-	}
-
-	return true;
+        px::imgui_console.m_Commands.emplace_back(
+            std::move(entries), plugin
+        );
+    }
+    else
+    {
+        iter->Commands.reserve(iter->Commands.size() + std::distance(begin, end));
+        while (begin != end)
+        {
+            iter->Commands.emplace_back(begin->second);
+            ++begin;
+        }
+    }
 }
 
-bool ConsoleManager::RemoveCommand(px::ConCommand* command)
+bool ConsoleManager::RemoveCommand(px::con_command* command)
 {
-	PluginContext* pCtx = px::plugin_manager.FindContext(command->plugin());
-	if (!pCtx)
-		return false;
-
-	return std::erase(
-        px::imgui_console.m_Commands,
-		command
-	) != 0;
-}
-
-void ConsoleManager::RemoveCommands()
-{
-	std::erase_if(
-        px::imgui_console.m_Commands,
-		[](px::ConCommand* cmd)
-		{
-			return cmd->plugin() != nullptr;
-		}
-	);
+    for (auto iter = px::imgui_console.m_Commands.begin(); iter != px::imgui_console.m_Commands.end(); iter++)
+    {
+        bool do_break = false;
+        for (auto cmd_iter = iter->Commands.begin(); cmd_iter != iter->Commands.end(); cmd_iter++)
+        {
+            if (*cmd_iter == command)
+            {
+                iter->Commands.erase(cmd_iter);
+                break;
+            }
+        }
+        if (do_break)
+        {
+            if (iter->Commands.empty())
+                px::imgui_console.m_Commands.erase(iter);
+            return true;
+        }
+    }
+    return false;
 }
 
 bool ConsoleManager::RemoveCommands(px::IPlugin* plugin)
@@ -47,306 +70,97 @@ bool ConsoleManager::RemoveCommands(px::IPlugin* plugin)
 	if (!pCtx)
 		return false;
 
-	return std::erase_if(
-        px::imgui_console.m_Commands,
-		[plugin](px::ConCommand* cmd)
-		{
-			return cmd->plugin() == plugin;
-		}
-	) != 0;
+    for (auto iter = px::imgui_console.m_Commands.begin(); iter != px::imgui_console.m_Commands.end(); iter++)
+    {
+        if (iter->Plugin == plugin)
+        {
+            px::imgui_console.m_Commands.erase(iter);
+            return true;
+        }
+    }
+    return false;
 }
 
-px::ConCommand* ConsoleManager::FindCommand(const std::string_view& name)
+const std::vector<ImGui_Console::CmdWrapper>& ConsoleManager::GetCommands() const noexcept
 {
-	for (px::ConCommand* cmd : px::imgui_console.m_Commands)
+    return px::imgui_console.m_Commands;
+}
+
+px::con_command* ConsoleManager::FindCommand(std::string_view name)
+{
+	for (auto& iter : px::imgui_console.m_Commands)
 	{
-		if (name == cmd->name())
-			return cmd;
+        for (auto cmd : iter.Commands)
+        {
+            if (!cmd->name().compare(name))
+                return cmd;
+        }
 	}
 	return nullptr;
 }
 
-std::vector<px::ConCommand*> ConsoleManager::FindCommands(px::IPlugin* plugin)
+std::vector<px::con_command*> ConsoleManager::FindCommands(px::IPlugin* plugin)
 {
-	std::vector<px::ConCommand*> cmds;
-	for (px::ConCommand* cmd : px::imgui_console.m_Commands)
+    for (auto& iter : px::imgui_console.m_Commands)
 	{
-		if (plugin == cmd->plugin())
-			cmds.push_back(cmd);
+        if (iter.Plugin == plugin)
+            return iter.Commands;
 	}
-	return cmds;
+    return{ };
 }
 
-std::vector<px::ConCommand*> ConsoleManager::FindCommands(const std::string_view& name)
+void ConsoleManager::Execute(std::string_view in_cmd)
 {
-	std::vector<px::ConCommand*> cmds;
-	if (!name.size())
-		cmds = px::imgui_console.m_Commands;
-	else
+    constexpr uint32_t red_clr = 255 | 120 << 0x8 | 120 << 0x10 | 255 << 0x18;
+    try
 	{
-		for (px::ConCommand* cmd : px::imgui_console.m_Commands)
-		{
-			if (name == cmd->name())
-				cmds.push_back(cmd);
-		}
-	}
-	return cmds;
-}
-
-void ConsoleManager::Execute(const std::string_view& cmds)
-{
-	try
-	{
-        auto commands = [&str = cmds]()
-        {
-            auto iter = str.begin(), end = str.end(), last_begin = iter;
-            std::vector<std::string_view> strs;
-
-            while (iter != end)
+        std::vector<px::con_command*> cmds;
+        auto args_infos = px::cmd_parser::parse(
+            in_cmd,
+            [this, &cmds](const std::string_view cmd_name, auto& begin, auto& end)
             {
-                while (iter != end && (*iter == ' ' || *iter == ';'))
-                    ++last_begin, ++iter;
-
-                if (iter == end)
-                    break;
-
-                enum class ParseState : char { None, SkipNext, InQuote, EndOfCmd } state = ParseState::None;
-
-                while (iter != end)
+                px::con_command* cmd = FindCommand(cmd_name);
+                if (!cmd)
                 {
-                    if (state == ParseState::SkipNext)
-                    {
-                        state = ParseState::None;
-                        ++iter;
-                        continue;
-                    }
-
-                    switch (*iter)
-                    {
-                    case '\\':
-                    {
-                        state = ParseState::SkipNext;
-                        break;
-                    }
-                    case '"':
-                    {
-                        state = state == ParseState::InQuote ? ParseState::None : ParseState::InQuote;
-                        break;
-                    }
-                    case ';':
-                    {
-                        if (state != ParseState::InQuote)
-                            state = ParseState::EndOfCmd;
-                        break;
-                    }
-                    }
-
-                    if (++iter == end || state == ParseState::EndOfCmd)
-                    {
-                        auto last_end = iter - 1;
-                        while (last_end != last_begin && *last_end == ';')
-                            --last_end;
-                        strs.emplace_back(last_begin, last_end + 1);
-
-                        if (iter != end)
-                            last_begin = iter;
-                        break;
-                    }
+                    this->Print(
+                        red_clr,
+                        std::format(R"(Command '{}' doesnt exists.)", cmd_name)
+                    );
+                    return false;
                 }
+                cmds.push_back(cmd);
+                begin = cmd->masks().begin();
+                end = cmd->masks().end();
+                return true;
             }
-
-            return strs;
-        }();
-
-        for (const auto& cmd : commands)
+        );
+        
+        px::con_command* help_cmd{ };
+        for (size_t i = 0; i < cmds.size(); i++)
         {
-            auto [pCmd, cmd_name, cmd_val, cmd_args] =
-                [cmd]()
+            if (args_infos[i].args.contains("help"))
             {
-                std::string_view cmd_val;
-                std::vector<std::pair<std::string_view, std::string_view>> args;
+                if (!help_cmd)
+                    help_cmd = FindCommand("help");
 
-                auto iter = cmd.begin(), end = cmd.cend(), last_begin = iter;
-
-                // seek first white and set [begin, cur( as cmd_name
-                while (iter != end && *iter != ' ')
-                    ++iter;
-
-                std::string_view cmd_name = { last_begin, iter };
-                px::ConCommand* pCmd = px::console_manager.FindCommand(cmd_name);
-
-                // there is more than command name, fetch them
-                if (pCmd && iter != end)
-                {
-                    auto advance_arg = [end](std::string_view::const_iterator& last_begin) -> std::string_view::const_iterator
-                    {
-                        while (last_begin != end && *last_begin == ' ')
-                            ++last_begin;
-
-                        auto iter = last_begin;
-                        enum class ParseState : char { None, SkipNext, InQuote, EndOfCmd } state = ParseState::None;
-
-                        while (iter != end)
-                        {
-                            if (state == ParseState::SkipNext)
-                            {
-                                state = ParseState::None;
-                                ++iter;
-                                continue;
-                            }
-
-                            switch (*iter)
-                            {
-                            case '\\':
-                            {
-                                state = ParseState::SkipNext;
-                                break;
-                            }
-                            case '"':
-                            {
-                                state = state == ParseState::InQuote ? ParseState::None : ParseState::InQuote;
-                                break;
-                            }
-                            case ' ':
-                            {
-                                if (state != ParseState::InQuote)
-                                    state = ParseState::EndOfCmd;
-                                break;
-                            }
-                            }
-
-                            if (state == ParseState::EndOfCmd)
-                            {
-                                return iter;
-                            }
-                            else ++iter;
-                        }
-
-                        return end;
-                    };
-
-                    while (iter != end)
-                    {
-                        while (iter != end && *iter == ' ')
-                            ++iter;
-
-                        if (iter == end)
-                            break;
-
-                        // seek arg, starts with '-'
-                        if (*iter == '-')
-                        {
-                            last_begin = iter + 1;
-                            while (iter != end && (*iter != ' ' && *iter != ':'))
-                                ++iter;
-
-                            std::string_view  arg_name{ last_begin, iter };
-                            if (iter == end)
-                            {
-                                args.emplace_back(arg_name, "");
-                                break;
-                            }
-
-                            last_begin = ++iter;
-
-                            enum class ParseState : char { None, SkipNext, InQuote, EndOfCmd } state = ParseState::None;
-                            while (iter != end)
-                            {
-                                if (state == ParseState::SkipNext)
-                                {
-                                    state = ParseState::None;
-                                    ++iter;
-                                    continue;
-                                }
-
-                                switch (*iter)
-                                {
-                                case '\\':
-                                {
-                                    state = ParseState::SkipNext;
-                                    break;
-                                }
-                                case '"':
-                                {
-                                    state = state == ParseState::InQuote ? ParseState::None : ParseState::InQuote;
-                                    break;
-                                }
-                                case ' ':
-                                case '-':
-                                {
-                                    if (state != ParseState::InQuote)
-                                        state = ParseState::EndOfCmd;
-                                    break;
-                                }
-                                }
-
-                                if (state == ParseState::EndOfCmd)
-                                    break;
-                                else ++iter;
-                            }
-
-                            if (last_begin != end && *last_begin == '\"')
-                                ++last_begin;
-                            auto tmp_iter = iter - 1;
-                            if (tmp_iter > last_begin && *tmp_iter == '\"')
-                                --tmp_iter;
-
-                            std::string_view  arg_val{ last_begin, tmp_iter };
-                            args.emplace_back(
-                                arg_name,
-                                arg_val
-                            );
-
-                            if (iter == end)
-                                break;
-                        }
-                        else if (*iter != ' ')
-                        {
-                            cmd_val = { iter, end };
-                            break;
-                        }
-                        ++iter;
-                    }
-                }
-
-                return std::tuple{ pCmd, cmd_name, cmd_val, args };
-            }();
-
-            if (!pCmd)
-            {
-                constexpr uint32_t red_clr = 255 | 120 << 0x8 | 120 << 0x10 | 255 << 0x18;
-                this->Print(
-                    red_clr,
-                    std::format("Command '{}' is not a command nor a convar.", cmd_name)
-                );
+                if (help_cmd)
+                    (*help_cmd)(cmds[i]->name());
             }
             else
             {
-                const char* callback_str = pCmd->exec_callback()(
-                    pCmd,
-                    { std::move(cmd_args), cmd_val }
-                );
-                if (callback_str)
-                {
-                    constexpr uint32_t red_clr = 255 | 120 << 0x8 | 120 << 0x10 | 255 << 0x18;
-                    this->Print(
-                        red_clr,
-                        callback_str
-                    );
-                }
+                (*cmds[i])(std::move(args_infos[i]));
             }
         }
 	}
     catch (const std::exception& ex)
     {
-        constexpr uint32_t red_clr = 255 | 120 << 0x8 | 120 << 0x10 | 255 << 0x18;
         this->Print(
             red_clr,
             std::format(
 R"(Exception reported while parsing command.
 Command: {}.
 Exception: {}.)",
-            cmds,
+            in_cmd,
             ex.what()
             )
         );

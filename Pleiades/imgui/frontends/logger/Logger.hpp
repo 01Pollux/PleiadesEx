@@ -1,9 +1,8 @@
 #pragma once
 
-#include "../render.hpp"
-#include "../../imgui_iface.hpp"
+#include <nlohmann/json.hpp>
+#include "imgui/imgui_iface.hpp"
 
-PX_NAMESPACE_BEGIN();
 
 struct ImGuiJsLogInfo
 {
@@ -76,5 +75,3 @@ public:
 private:
 	ImGuiPlLogSection m_LogSection;
 };
-
-PX_NAMESPACE_END();

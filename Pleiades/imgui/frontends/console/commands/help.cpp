@@ -1,99 +1,35 @@
 
-#include "../Console.hpp"
 #include "plugins/Manager.hpp"
+#include "../Console.hpp"
+#include "console/Manager.hpp"
 
 PX_COMMAND(
 	help,
-R"(
-	For more information about a command, type "help <command>".
+R"(For more information about a command, type "help <command>".
 	USAGE:
-		] find [flags] [command]
-	
-	-ci:	Display list of commands registered in console internally.
-	-ce:	Display list of commands registered in console externally.
-
-	-vi:	Display list of convars registered in console internally.
-	-ve:	Display list of convars registered in console externally.
-)"
+		] help [command]...)"
 )
 {
-		if (args.arg_size())
+	if (exec_info.value.empty())
+	{
+		px::console_manager.Print(
+			std::string{ help_cmd.help() }
+		);
+	}
+	else
+	{
+		const float word_size = ImGui::CalcTextSize(" ").y;
+
+		for (auto& name : exec_info.value.split<std::string>(" "))
 		{
-			auto cmds = px::console_manager.FindCommands("");
-			std::vector<px::ConCommand*> final_cmds;
-
-			{
-				bool cmds_e_only = args.contains("ci");
-				bool cmds_i_only = args.contains("ce");
-
-				bool cvars_e_only = args.contains("vi");
-				bool cvars_i_only = args.contains("ve");
-
-				size_t cmd_idx = 0;
-				for (auto& cmd : cmds)
-				{
-					if (cmd->is_command())
-					{
-						if (cmd->plugin())
-						{
-							if (!cmds_e_only)
-								continue;
-						}
-						else if (!cmds_i_only)
-							continue;
-					}
-					else
-					{
-						if (cmd->plugin())
-						{
-							if (!cvars_e_only)
-								continue;
-						}
-						else if (!cvars_i_only)
-							continue;
-					}
-
-					px::console_manager.Print(
-						{ 255, 120, 120, 255 },
-						std::format("[{}] : {}", ++cmd_idx, cmd->name())
-					);
-				}
-			}
-
-			return nullptr;
-		}
-		else
-		{
-			px::ConCommand* cmd;
-			if (args.val_size())
-			{
-				auto target_cmd = args.get_val<std::string>("");
-				cmd = px::console_manager.FindCommand(target_cmd);
-				if (!cmd)
-				{
-					px::console_manager.Print(
-						{ 255, 120, 120, 255 },
-						std::format("Command '{}' is not a command nor a convar", target_cmd)
-					);
-					return nullptr;
-				}
-			}
-			else cmd = pCmd;
-
+			px::con_command* cmd = px::console_manager.FindCommand(name);
+			if (cmd)
 			{
 				px::console_manager.Print(
-					{ 255, 255, 255, 255 },
-					std::format(
-R"(Name:	'{}'
-Plugin:	'{}'
-Description:
-{})", 
-					cmd->name(), 
-					!cmd->plugin() ? "Internal" : cmd->plugin()->GetPluginInfo()->m_Name,
-					cmd->description()
-					)
+					std::format("\nCommand: \"{}\"\nDescription:\n{}\n\n",cmd->name(), cmd->help())
 				);
 			}
-			return nullptr;
+			
 		}
+	}
 }

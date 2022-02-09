@@ -1059,9 +1059,13 @@ namespace ImPlot
         case ImPlotTimeUnit_Ms:  return ImPlotTime(t.S, (t.Us / 1000) * 1000);
         case ImPlotTimeUnit_Us:  return t;
         case ImPlotTimeUnit_Yr:  GImPlot->Tm.tm_mon = 0; // fall-through
+            [[fallthrough]];
         case ImPlotTimeUnit_Mo:  GImPlot->Tm.tm_mday = 1; // fall-through
+            [[fallthrough]];
         case ImPlotTimeUnit_Day: GImPlot->Tm.tm_hour = 0; // fall-through
+            [[fallthrough]];
         case ImPlotTimeUnit_Hr:  GImPlot->Tm.tm_min = 0; // fall-through
+            [[fallthrough]];
         case ImPlotTimeUnit_Min: GImPlot->Tm.tm_sec = 0; break;
         default:                 return t;
         }
@@ -3937,9 +3941,9 @@ namespace ImPlot
         }
 
         g.ActiveIdAllowOverlap = is_hovered;
-        g.ActiveIdUsingNavDirMask = ~(ImU32)0;
-        g.ActiveIdUsingNavInputMask = ~(ImU32)0;
-        g.ActiveIdUsingKeyInputMask = ~(ImU64)0;
+        g.ActiveIdUsingNavDirMask = static_cast<ImU32>(-1);
+        g.ActiveIdUsingNavInputMask = static_cast<ImU32>(-1);
+        g.ActiveIdUsingKeyInputMask.SetAllBits();
 
         if (ImGui::IsMouseDragging(mouse_button))
         {
@@ -4011,9 +4015,12 @@ namespace ImPlot
         IM_ASSERT_USER_ERROR(gp.CurrentItems != NULL, "BeginDragDropSourceItem() needs to be called within an itemized context!");
         ImGuiID item_id = ImGui::GetIDWithSeed(label_id, NULL, gp.CurrentItems->ID);
         ImPlotItem* item = gp.CurrentItems->GetItem(item_id);
-        bool is_hovered = item && item->LegendHovered;
-        ImGuiID temp_id = ImGui::GetIDWithSeed("dnd", NULL, item->ID); // total hack
-        return BeginDragDropSourceEx(temp_id, is_hovered, flags, ImGuiKeyModFlags_None);
+        if (item)
+        {
+            ImGuiID temp_id = ImGui::GetIDWithSeed("dnd", NULL, item->ID); // total hack
+            return BeginDragDropSourceEx(temp_id, item->LegendHovered, flags, ImGuiKeyModFlags_None);
+        }
+        else return false;
     }
 
     void EndDragDropSource()

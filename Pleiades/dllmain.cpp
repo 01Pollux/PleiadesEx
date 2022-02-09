@@ -1,7 +1,4 @@
 
-#define WIN32_MEAN_AND_LEAN
-#include <Windows.h>
-
 #include <memory>
 #include <format>
 #include <chrono>
@@ -13,7 +10,6 @@
 #include "detours/HooksManager.hpp"
 #include "Logs/Logger.hpp"
 
-#define WIN32_MEAN_AND_LEAN
 #include <Windows.h>
 #include <minidumpapiset.h>
 

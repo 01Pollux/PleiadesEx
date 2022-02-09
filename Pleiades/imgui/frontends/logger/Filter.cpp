@@ -1,13 +1,10 @@
 #include "Logger.hpp"
 #include <imgui/imgui_internal.h>
 
-PX_NAMESPACE_BEGIN();
 
-// TODO: logs -> rename Message to Warning
 // TODO: for Fatal : bright red, Error Red brown, Warning : yellow, Debug Dark green
 // 
 // if value is cutsom, TODO investigate how json write to stream
-// REPORT TO MSDN about Intellisense not showing suggestion before first time modules
 // RESOLVE Info section with only one entry -> Message: ... 
 
 bool ImGuiPlLogSection::FilterPlugin(iterator_type iter) const
@@ -77,7 +74,7 @@ bool ImGuiJsLogInfo::FilterInfo(const ImGuiTextFilter& filter, nlohmann::json::c
             if (str[cmd_offset + 1] == 't')
             {
                 for (std::string_view log_type : {
-                    "debug",
+                        "debug",
                         "message",
                         "error",
                         "fatal"
@@ -221,5 +218,3 @@ bool ImGuiJsLogInfo::FilterInfo(const ImGuiTextFilter& filter, nlohmann::json::c
     // Implicit * grep
 	return filter.CountGrep == 0;
 }
-
-PX_NAMESPACE_END();

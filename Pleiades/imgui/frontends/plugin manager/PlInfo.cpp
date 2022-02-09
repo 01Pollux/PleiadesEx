@@ -1,11 +1,10 @@
 
+#include "imgui/backends/States.hpp"
 #include "PluginManager.hpp"
-
-PX_NAMESPACE_BEGIN();
 
 void ImGuiPlInfo::DrawPopupState()
 {
-	if (ImGui::BeginPopupContextWindow(nullptr, ImGuiPopupFlags_NoOpenOverExistingPopup | ImGuiPopupFlags_MouseButtonRight))
+	if (imcxx::popup plugin_popup{ imcxx::popup::context_window{}, nullptr, ImGuiPopupFlags_NoOpenOverExistingPopup | ImGuiPopupFlags_MouseButtonRight })
 	{
 		for (auto& info : std::array{
 			 std::tuple{
@@ -35,16 +34,13 @@ void ImGuiPlInfo::DrawPopupState()
 			 })
 		{
 			ImVec4& clr = std::get<2>(info);
-			ImGui::PushStyleColor(ImGuiCol_Header, clr);
-			clr.w += 0.1f; ImGui::PushStyleColor(ImGuiCol_HeaderHovered, clr);
-			clr.w += 0.1f; ImGui::PushStyleColor(ImGuiCol_HeaderActive, clr);
+			imcxx::shared_color color_override(ImGuiCol_Header, clr);
+			clr.w += 0.1f; color_override.push(ImGuiCol_HeaderHovered, clr);
+			clr.w += 0.1f; color_override.push(ImGuiCol_HeaderActive, clr);
 
 			if (ImGui::Selectable(std::get<0>(info), false, std::get<1>(info) ? ImGuiSelectableFlags_Disabled : ImGuiSelectableFlags_None))
 				(this->*std::get<3>(info))();
-
-			ImGui::PopStyleColor(3);
 		}
-		ImGui::EndPopup();
 	}
 }
 
@@ -106,29 +102,21 @@ void ImGuiPlInfo::PauseOrResume()
 
 void ImGuiPlInfo::DrawPluginsProps()
 {
-	auto& props = px::imgui_iface.GetPropManager();
-	
-	if (ImGui::CollapsingHeader("Plugin Props"))
+	if (imcxx::collapsing_header plugin_props{ "Plugin Props" })
 	{
-		for (auto& prop : props.CallbackProps)
+		for (auto& prop : renderer::global_state::Bridge.PropManager.CallbackProps)
 		{
 			auto& info = prop.second;
 			if (info.Plugin != this->Plugin)
 				continue;
 
 			ImGui::BulletText("%s: ", prop.first);
-			ImGui::PushID(info.Id);
-			ImGui::Indent();
-
-			info._Changed |= info.Callback();
-
-			ImGui::Unindent();
-			ImGui::PopID();
-
+			{
+				imcxx::shared_item_id info_id(info.Id);
+				imcxx::indent indent;
+				info._Changed |= info.Callback();
+			}
 			ImGui::NewLine();
 		}
 	}
 }
-
-
-PX_NAMESPACE_END();

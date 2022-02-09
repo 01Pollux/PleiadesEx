@@ -2,44 +2,89 @@
 #include <regex>
 #include <set>
 #include "../Console.hpp"
+#include "console/Manager.hpp"
 
 PX_COMMAND(
 	find,
-R"(
-	Clear console output.
-	USAGE:
-		] find [flags] [files, ...]
-	
-	-n <count=0>:	Number of entries to print out.
-	-r:				Use regular expression.
-	-c:				Search for commands.
-	-v:				Search for convars.
-	-look:
-		* name			: Lookup in command's name.
-		* description	: Lookup in command's description.
-		* plugin		: Lookup in command plugin's name.
-)"
+R"(Find command/convars currently registered.
+USAGE:
+	] find [flags] [files, ...]
+
+FLAGS:
+	-h, --help			   show help message.
+	-n, --count			 Number of entries to print out.
+	-r, --regex			  Use regular expression.
+	-c, --commands	Search for commands.
+	-v, --convars		 Search for convars.)",
+	{
+		px::cmd_mask{ "help",		'h', false, true },
+
+		px::cmd_mask{ "count",		'n' },
+		px::cmd_mask{ "regex",		'r', false, true },
+
+		px::cmd_mask{ "commands",	'c', false, true },
+		px::cmd_mask{ "convars",	'v', false, true }
+	}
 )
 {
-	size_t count = args.get_arg("n", 0);
-	auto vals = args.get_val<std::vector<std::string>>();
 
-	auto cmds = px::console_manager.FindCommands("");
-	std::set<px::ConCommand*> found_cmds;
+	size_t count = exec_info.args.get<size_t>("count", 0);
+	auto vals = exec_info.value.split<std::string_view>();
 
-	bool allow_cvars = args.contains("c");
-	bool allow_cmds = args.contains("v");
+	const auto& commands_info = px::console_manager.GetCommands();
+	std::set<px::con_command*> found_cmds;
 
-	if (args.contains("r"))
+	bool allow_cmds = exec_info.args.contains("commands");
+	bool allow_cvars = exec_info.args.contains("convars");
+
+	if (exec_info.args.contains("regex"))
 	{
 		try
 		{
 			std::vector<std::regex> regs;
 			regs.reserve(vals.size());
-			for (auto& val : vals)
-				regs.emplace_back(val.c_str(), val.size());
+			for (const auto& val : vals)
+				regs.emplace_back(std::string{ val.data(), val.data() + val.size() });
 
-			for (auto cmd : cmds)
+			for (auto& pl_and_cmds : commands_info)
+			{
+				for (auto cmd : pl_and_cmds.Commands)
+				{
+					if (cmd->is_command())
+					{
+						if (!allow_cmds)
+							continue;
+					}
+					else
+					{
+						if (!allow_cvars)
+							continue;
+					}
+					for (const auto& reg : regs)
+					{
+						if (std::regex_search(cmd->name().begin(), cmd->name().end(), reg))
+						{
+							if (!found_cmds.insert(cmd).second)
+								break;
+						}
+					}
+				}
+			}
+		}
+		catch (const std::exception& ex)
+		{
+			px::console_manager.Print(
+				{ 255, 120, 120, 255 },
+				std::format("Exception reported while matching for regular expression : \n{}", ex.what())
+			);
+			return;
+		}
+	}
+	else
+	{
+		for (auto& pl_and_cmds : commands_info)
+		{
+			for (auto cmd : pl_and_cmds.Commands)
 			{
 				if (cmd->is_command())
 				{
@@ -51,45 +96,13 @@ R"(
 					if (!allow_cvars)
 						continue;
 				}
-				for (auto& reg : regs)
+				for (const auto& val : vals)
 				{
-					if (std::regex_search(cmd->name().begin(), cmd->name().end(), reg))
+					if (cmd->name().contains(val))
 					{
 						if (!found_cmds.insert(cmd).second)
 							break;
 					}
-				}
-			}
-		}
-		catch (const std::exception& ex)
-		{
-			px::console_manager.Print(
-				{ 255, 120, 120, 255 },
-				std::format("Exception reported while matching for regular expression : \n{}", ex.what())
-			);
-			return nullptr;
-		}
-	}
-	else
-	{
-		for (auto cmd : cmds)
-		{
-			if (cmd->is_command())
-			{
-				if (!allow_cmds)
-					continue;
-			}
-			else
-			{
-				if (!allow_cvars)
-					continue;
-			}
-			for (auto& val : vals)
-			{
-				if (cmd->name().contains(val))
-				{
-					if (!found_cmds.insert(cmd).second)
-						break;
 				}
 			}
 		}
@@ -103,6 +116,4 @@ R"(
 			std::format("[{}] : {}", ++cmd_idx, cmd->name())
 		);
 	}
-
-	return nullptr;
 }

@@ -1,9 +1,8 @@
 #include "Profiler.hpp"
 #include "ImPlot/implot.h"
 
-PX_NAMESPACE_BEGIN();
 
-void ImGui_BrdigeRenderer::RenderProfiler()
+void renderer::global_state::ImGui_BrdigeRenderer::RenderProfiler()
 {
     {
         static bool init = false;
@@ -23,18 +22,15 @@ void ImGui_BrdigeRenderer::RenderProfiler()
 
 ImGuiPlProfiler::ImGuiPlProfiler()
 {
-    m_ProfilerInstance.m_Instance = profiler::manager::Get();
+    m_ProfilerInstance.m_Instance = px::profiler::manager::Get();
 }
 
 void ImGuiPlProfiler::RenderSpace()
 {
     constexpr const char* PopupName = "Color Select";
 
-    if (ImGui::BeginPopup(PopupName))
-    {
-        ImGui::ColorPicker("##ColorSelect", m_ProfilerInstance.m_Instance->Color.rgba);
-        ImGui::EndPopup();
-    }
+    if (imcxx::popup color_select_popup{ PopupName })
+        imcxx::color{ imcxx::color::picker{}, "##ColorSelect", m_ProfilerInstance.m_Instance->Color.rgba };
 
     if (const bool is_on = m_ProfilerInstance.m_Instance->IsEnabled();
         ImGui::Button(is_on ? ICON_FA_PAUSE " Pause" : ICON_FA_PLAY " Resume"))
@@ -51,9 +47,7 @@ void ImGuiPlProfiler::RenderSpace()
 
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_TIMES " Clear"))
-    {
         m_ProfilerInstance.erase("");
-    }
 
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_PALETTE " Color"))
@@ -62,5 +56,3 @@ void ImGuiPlProfiler::RenderSpace()
             ImGui::OpenPopup(PopupName);
     }
 }
-
-PX_NAMESPACE_END();

@@ -3,14 +3,13 @@
 #include <regex>
 
 #include <nlohmann/Json.hpp>
-#include <px/string.hpp>
 
-#include "Impl/Library/LibrarySys.hpp"
+#include "logs/Logger.hpp"
+#include "library/Manager.hpp"
 #include "Profiler.hpp"
 
-PX_NAMESPACE_BEGIN();
 
-void ImGuiProfilerInstance::SectionHandler::Update(const profiler::types::entry_container& infos)
+void ImGuiProfilerInstance::SectionHandler::Update(const px::profiler::types::entry_container& infos)
 {
     this->Clear();
     m_Sections.reserve(infos.size());
@@ -117,50 +116,64 @@ void ImGuiProfilerInstance::SectionHandler::SetElapsedTime() noexcept
 void ImGuiProfilerInstance::SectionHandler::Export(const std::string& file_name)
 {
     using namespace std::chrono_literals;
-    using name_and_duration = std::pair<const char*, profiler::types::clock_duration>;
+    using name_and_duration = std::pair<const char*, px::profiler::types::clock_duration>;
 
-    char path[MAX_PATH];
-    if (!px::lib_manager.GoToDirectory(PlDirType::Profiler, nullptr, path, std::ssize(path)))
-        return;
-
-    nlohmann::json data;
-    for (auto& section : this->m_Sections)
+    try
     {
-        auto& cur_sec = data[section.name];
-        for (auto& name_dur : {
-            name_and_duration{ "min", section.min },
-            name_and_duration{ "max", section.max },
-            name_and_duration{ "avg (min/max)", section.avg_minmax },
-            name_and_duration{ "avg (total)", section.avg_total },
-        })
-        {
-            cur_sec[name_dur.first] = std::format("{}ns ({}us) ({}ms)", name_dur.second / 1ns, name_dur.second / 1us, name_dur.second / 1ms);
-        }
+        std::string path = px::lib_manager.GoToDirectory(px::PlDirType::Profiler);
+        if (path.empty())
+            return;
 
-        auto& entries = cur_sec["Entries"];
-        size_t stacktrace_index = 0;
-
-        for (auto& entry : section.entries)
+        nlohmann::json data;
+        for (auto& section : this->m_Sections)
         {
-            entries["time"] = std::format("{}ns ({}us) ({}ms)", entry.duration / 1ns, entry.duration / 1us, entry.duration / 1ms);
-            if (entry.stack_info)
+            auto& cur_sec = data[section.name];
+            for (auto& name_dur : {
+                name_and_duration{ "min", section.min },
+                name_and_duration{ "max", section.max },
+                name_and_duration{ "avg (min/max)", section.avg_minmax },
+                name_and_duration{ "avg (total)", section.avg_total },
+                })
             {
-                // it's very slow if we were to iterate through boost::stacktrace::frame(s) and get name, source file and line
-                // instad we will dump everything to a single string and split it by new line
-                std::string stacktrace = boost::stacktrace::to_string(*entry.stack_info);
-                std::regex token{ "\\n+" };
-                std::sregex_token_iterator iter{ stacktrace.cbegin(), stacktrace.end(), token, -1 }, end;
-                auto& trace = entries["stack trace"][stacktrace_index++];
+                cur_sec[name_dur.first] = std::format("{}ns ({}us) ({}ms)", name_dur.second / 1ns, name_dur.second / 1us, name_dur.second / 1ms);
+            }
 
-                for (; iter != end; iter++)
-                    trace.emplace_back(iter->str());
+            auto& entries = cur_sec["Entries"];
+            size_t stacktrace_index = 0;
+
+            for (auto& entry : section.entries)
+            {
+                entries["time"] = std::format("{}ns ({}us) ({}ms)", entry.duration / 1ns, entry.duration / 1us, entry.duration / 1ms);
+                if (entry.stack_info)
+                {
+                    // it's very slow if we were to iterate through boost::stacktrace::frame(s) and get name, source file and line
+                    // instad we will dump everything to a single string and split it by new line
+                    std::string stacktrace = boost::stacktrace::to_string(*entry.stack_info);
+                    std::regex token{ "\\n+" };
+                    std::sregex_token_iterator iter{ stacktrace.cbegin(), stacktrace.end(), token, -1 }, end;
+                    auto& trace = entries["stack trace"][stacktrace_index++];
+
+                    for (; iter != end; iter++)
+                        trace.emplace_back(iter->str());
+                }
             }
         }
+
+        std::ofstream file(
+			std::format("{}/{}__{0:%g}_{0:%h}_{0:%d}_{0:%H}_{0:%OM}_{0:%OS}.profiler.json",
+				std::chrono::system_clock::now(),
+				path,
+				file_name
+			)
+        );
+        file.width(4);
+        file << data;
     }
-
-    std::ofstream file(std::format("{}/{}.{}.profiler.json", path, file_name, px::FormatTime("__{0:%g}_{0:%h}_{0:%d}_{0:%H}_{0:%OM}_{0:%OS}")));
-    file.width(4);
-    file << data;
+    catch (const std::exception& ex)
+    {
+        PX_LOG_MESSAGE(
+            PX_MESSAGE("Exception reported while loading exporting profiler instance"),
+            PX_LOGARG("Exception", ex.what())
+        );
+    }
 }
-
-PX_NAMESPACE_END();

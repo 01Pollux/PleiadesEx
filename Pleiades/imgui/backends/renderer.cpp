@@ -5,6 +5,7 @@
 #include "plugins/Manager.hpp"
 #include "Logs/Logger.hpp"
 
+#include <imgui/imcxx/all_in_one.hpp>
 #include "States.hpp"
 
 void renderer::global_state::ImGui_BrdigeRenderer::RenderAll()
@@ -19,11 +20,7 @@ void renderer::global_state::ImGui_BrdigeRenderer::RenderAll()
 		if (!ImGui::IsPopupOpen("##About"))
 			ImGui::OpenPopup("##About");
 
-		if (ImGui::BeginPopupModal("##About", &show_about, ImGuiWindowFlags_NoResize))
-		{
-			ImGui_BrdigeRenderer::RenderAbout();
-			ImGui::EndPopup();
-		}
+		imcxx::popup(imcxx::popup::modal{}, "##About", &show_about, ImGuiWindowFlags_NoResize).active_invoke(&ImGui_BrdigeRenderer::RenderAbout, this);
 	}
 	else if (is_shutting_down)
 	{
@@ -43,39 +40,31 @@ void renderer::global_state::ImGui_BrdigeRenderer::RenderAll()
 		}
 	}
 
-	if (ImGui::BeginMenuBar())
+	if (imcxx::menubar menu_bar{})
 	{
-		if (ImGui::BeginMenu("More..."))
+		if (auto more_menu = menu_bar.add_item("More..."))
 		{
-			if (ImGui::MenuItem(ICON_FA_PAINT_BRUSH " Style editor"))
+			if (more_menu.add_entry(ICON_FA_PAINT_BRUSH " Style editor"))
 				show_style_editor = true;
 
-			if (ImGui::BeginMenu(ICON_FA_PALETTE " Themes"))
-			{
+			if (auto themes = menu_bar.add_item(ICON_FA_PALETTE " Themes"))
 				ThemeManager.Render();
-				ImGui::EndMenu();
-			}
 			
-			if (ImGui::MenuItem(ICON_FA_INFO_CIRCLE " About"))
+			if (more_menu.add_entry(ICON_FA_INFO_CIRCLE " About"))
 				show_about = true;
 
-			if (ImGui::MenuItem(ICON_FA_POWER_OFF " Quit"))
+			if (more_menu.add_entry(ICON_FA_POWER_OFF " Quit"))
 				is_shutting_down = true;
-
-			ImGui::EndMenu();
 		}
 
-		if (ImGui::BeginMenu("Tabs"))
+		if (auto tabs_menu = menu_bar.add_item("Tabs"))
 		{
 			for (auto& tab : MainTabsInfo)
 			{
 				if (ImGui::Selectable(tab.Name, &tab.IsOpen, ImGuiSelectableFlags_DontClosePopups))
 					tab.IsFocused = true;
 			}
-			
-			ImGui::EndMenu();
 		}
-		ImGui::EndMenuBar();
 	}
 
 	const ImGuiID dock_id = ImGui::GetID("Main Tab");
@@ -89,26 +78,18 @@ void renderer::global_state::ImGui_BrdigeRenderer::RenderAll()
 			continue;
 
 		tab.IsFocused = false;
-		if (ImGui::Begin(tab.Name, &tab.IsOpen, tab_flags | ImGuiWindowFlags_NoFocusOnAppearing))
+		if (imcxx::window cur_tab{ tab.Name, &tab.IsOpen, tab_flags | ImGuiWindowFlags_NoFocusOnAppearing })
 		{
 			if (tab.IsFocused = tab.IsOpen)
 			{
-				ImGui::PushID(&tab);
+				imcxx::shared_item_id tab_id(&tab);
 				(this->*tab.Callback)();
-				ImGui::PopID();
 			}
 		}
-		
-		ImGui::End();
 	}
 
 	if (show_style_editor)
-	{
-		if (ImGui::Begin("Style editor", &show_style_editor, tab_flags))
-			ImGui::ShowStyleEditor();
-
-		ImGui::End();
-	}
+		imcxx::window("Style editor", &show_style_editor, tab_flags).active_invoke(ImGui::ShowStyleEditor, nullptr);
 }
 
 

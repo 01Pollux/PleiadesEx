@@ -8,12 +8,15 @@
 #include <imgui/imgui.h>
 #include <px/icons/FontAwesome.hpp>
 
+#include "logs/Logger.hpp"
+
+
 void ImGuiThemesManager::ReloadThemes()
 {
 	this->m_LoadedThemes.clear();
-	if (std::string path = px::lib_manager.GoToDirectory(px::PlDirType::Main, "themes"); !path.empty())
+	try
 	{
-		try
+		if (std::string path = px::lib_manager.GoToDirectory(px::PlDirType::Main, "themes"); !path.empty())
 		{
 			namespace fs = std::filesystem;
 			for (auto& dir : fs::directory_iterator(path))
@@ -30,10 +33,15 @@ void ImGuiThemesManager::ReloadThemes()
 					this->m_LoadedThemes.emplace_back(dir.path().stem().string(), std::move(cfg));
 			}
 		}
-		catch (...)
-		{}
 	}
-
+	catch (const std::exception& ex)
+	{
+		PX_LOG_MESSAGE(
+			PX_MESSAGE("Exception reported while reloading themes"),
+			PX_LOGARG("Exception", ex.what())
+		);
+	}
+	
 	this->CurrentTheme = nullptr;
 }
 
@@ -43,9 +51,7 @@ void ImGuiThemesManager::Render()
 	for (auto& theme : m_LoadedThemes)
 	{
 		if (ImGui::MenuItem(theme.Name.c_str()))
-		{
 			this->SetColors(theme);
-		}
 	}
 
 	ImGui::Separator();
@@ -71,33 +77,29 @@ void ImGuiThemesManager::LoadTheme(const std::string& name)
 
 void ImGuiThemesManager::SetColors(const Theme& theme)
 {
-	ImGuiStyle& style = ImGui::GetStyle(); 
+	ImGuiStyle& style = ImGui::GetStyle();
 	ImVec4* clrs = style.Colors;
 	this->CurrentTheme = &theme.Name;
-	
+
 	if (auto colors = theme.Info.find("colors"); colors != theme.Info.end())
 	{
 		for (size_t i = 0; i < ImGuiCol_COUNT; i++)
 		{
 			const char* name = ImGui::GetStyleColorName(i);
 			auto iter = colors->find(name);
-			if (iter == colors->end())
+			if (iter == colors->end() || !iter->is_array())
 				continue;
-			try
+
+			const auto& arr = *iter;
+			if (arr.size() >= 4)
 			{
-				std::vector arr = iter->get<std::vector<int>>();
-				if (arr.size() >= 4)
-				{
-					clrs[i] = {
-						static_cast<float>(arr[0]) / 255,
-						static_cast<float>(arr[1]) / 255,
-						static_cast<float>(arr[2]) / 255,
-						static_cast<float>(arr[3]) / 255
-					};
-				}
+				clrs[i] = {
+					static_cast<float>(arr[0]) / 255,
+					static_cast<float>(arr[1]) / 255,
+					static_cast<float>(arr[2]) / 255,
+					static_cast<float>(arr[3]) / 255
+				};
 			}
-			catch (...)
-			{ }
 		}
 	}
 
@@ -138,7 +140,7 @@ void ImGuiThemesManager::SetColors(const Theme& theme)
 		std::pair{ "SelectableTextAlign",std::pair{ &style.SelectableTextAlign.x,&style.SelectableTextAlign.y } },
 		std::pair{ "DisplayWindowPadding",std::pair{ &style.DisplayWindowPadding.x,&style.DisplayWindowPadding.y } },
 		std::pair{ "DisplaySafeAreaPadding",std::pair{ &style.DisplaySafeAreaPadding.x,&style.DisplaySafeAreaPadding.y } },
-	})
+		})
 	{
 		if (auto section = theme.Info.find(name_settings.first); section != theme.Info.end())
 		{
@@ -158,6 +160,4 @@ void ImGuiThemesManager::SetColors(const Theme& theme)
 			}
 		}
 	}
-
-
 }

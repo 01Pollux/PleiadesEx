@@ -1,8 +1,6 @@
 
 #include "Profiler.hpp"
 
-PX_NAMESPACE_BEGIN();
-
 /*
 -------------------------------------------------------------------------------------------------------------------------------------
 Functions               |   Count   |   Min                 |       Max             |   Avg(min/max)        |   Avg(total)          |
@@ -45,7 +43,7 @@ void ImGuiProfilerInstance::SectionHandler::DisplayHierachy()
         ImGuiTableFlags_ContextMenuInBody |
         ImGuiTableFlags_NoHostExtendX;
 
-    if (ImGui::BeginTable("Hierachy Table", 6, table_flags))
+    if (imcxx::table hierachy_table{ "Hierachy Table", 6, table_flags })
     {
         ImGui::TableSetupColumn("Functions");   // 1
         for (auto sec : HierachyNames)
@@ -53,8 +51,6 @@ void ImGuiProfilerInstance::SectionHandler::DisplayHierachy()
         ImGui::TableHeadersRow();
         
         ImGuiProfiler_ImplDisplayHierachy(this->m_Sections.begin(), this->m_Sections.end());
-
-        ImGui::EndTable();
     }
 }
 
@@ -67,23 +63,23 @@ void ImGuiProfiler_ImplDisplayHierachy(
 {
     auto display_infos = [](ImGuiProfilerInstance::SectionHandler::container_type::value_type& entry_info)
     {
-        if (ImGui::BeginPopupContextItem())
+        if (imcxx::popup hierachy_popup{ imcxx::popup::context_item{} })
         {
             size_t i = 0;
             auto& entries = entry_info.entries;
             for (auto entry = entries.begin(); entry != entries.end(); entry++)
             {
-                if (ImGui::BeginMenu(std::format("[{}]", i++).c_str()))
+                if (imcxx::menubar_item menu_entry{ std::format("[{}]", i++) })
                 {
                     using namespace std::chrono_literals;
 
                     bool should_break = false;
 
-                    if (ImGui::MenuItem("Stack Trace"))
+                    if (menu_entry.add_entry("Stack Trace"))
                     {
                         if (entry->stack_info)
                         {
-                            ImGui::CloseCurrentPopup();
+                            hierachy_popup.close();
                             ImGuiPlProfiler::StackTracePopup.SetPopupInfo(*entry->stack_info, nullptr, nullptr);
                         }
                         should_break = true;
@@ -92,32 +88,26 @@ void ImGuiProfiler_ImplDisplayHierachy(
                     float pct_minmax = static_cast<float>(entry->duration.count()) / entry_info.avg_minmax.count(),
                         pct_avg = static_cast<float>(entry->duration.count()) / entry_info.avg_total.count();
 
-                    ImGui::PushStyleColor(
+                    imcxx::shared_color text_color(
                         ImGuiCol_Text,
                         ImGuiProfilerInstance::SectionHandler::GetColor(1.f - pct_minmax)
                     );
 
-                    if (ImGui::MenuItem(
+                    if (menu_entry.add_entry(
                         std::format(
                             "{}ns ({}us) ({}ms) (Pct min/max: {:.3f}%) (Pct avg: {:.3f}%)",
                             entry->duration / 1ns, entry->duration / 1us, entry->duration / 1ms,
                             100.f - pct_minmax * 100.f,
                             100.f - pct_avg * 100.f
-                        ).c_str())
-                        )
+                        ).c_str()))
                     {
                         should_break = true;
                     }
-
-                    ImGui::PopStyleColor();
-
-                    ImGui::EndMenu();
 
                     if (should_break)
                         break;
                 }
             }
-            ImGui::EndPopup();
         }
 
         // Count
@@ -149,7 +139,7 @@ void ImGuiProfiler_ImplDisplayHierachy(
             ImGui::TableNextColumn();
 
             std::string unique_name = std::format("{}##{}", cur_pos->name, static_cast<void*>(&*cur_pos));
-            bool is_open = ImGui::TreeNodeEx(unique_name.c_str(), ImGuiTreeNodeFlags_SpanFullWidth);
+            imcxx::tree_node hierachy_node(unique_name.c_str(), ImGuiTreeNodeFlags_SpanFullWidth);
 
             display_infos(*cur_pos);
 
@@ -172,11 +162,8 @@ void ImGuiProfiler_ImplDisplayHierachy(
 
 
             // display the section [next_iter, cur_iter(
-            if (is_open)
-            {
+            if (hierachy_node)
                 ImGuiProfiler_ImplDisplayHierachy(next_iter, cur_pos, offset + 1);
-                ImGui::TreePop();
-            }
             --cur_pos;
 
             // decrement the cur_iter iterator and check if we've reached end of sections
@@ -187,10 +174,13 @@ void ImGuiProfiler_ImplDisplayHierachy(
         else
         {
             ImGui::TableNextColumn();
-            ImGui::TreeNodeEx(&cur_pos->entries, ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_SpanFullWidth, "%s", cur_pos->name.c_str());
+            [[maybe_unused]] imcxx::tree_node entry_node(
+                static_cast<const void*>(std::addressof(cur_pos->entries)),
+                ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_SpanFullWidth, 
+                "%s",
+                cur_pos->name.c_str()
+            );
             display_infos(*cur_pos);
         }
     }
 }
-
-PX_NAMESPACE_END();

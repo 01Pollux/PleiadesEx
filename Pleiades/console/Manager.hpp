@@ -1,29 +1,22 @@
 #pragma once
 
 #include <px/console.hpp>
+#include "imgui/frontends/console/Console.hpp"
 
 class ConsoleManager : public px::IConsoleManager
 {
-protected:
-	/// <summary>
-	/// Add console commands to plugin's commands
-	/// </summary>
-	bool AddCommands(px::ConCommand* command) override;
-
 public:
-	bool RemoveCommand(px::ConCommand* command) override;
+	bool RemoveCommand(px::con_command* command) override;
 	
 	bool RemoveCommands(px::IPlugin* plugin) override;
 
-	void RemoveCommands();
-	
-	px::ConCommand* FindCommand(const std::string_view& name) override;
-	
-	std::vector<px::ConCommand*> FindCommands(px::IPlugin* plugin) override;
+	[[nodiscard]] const std::vector<ImGui_Console::CmdWrapper>& GetCommands() const noexcept;
 
-	std::vector<px::ConCommand*> FindCommands(const std::string_view& name) override;
+	std::vector<px::con_command*> FindCommands(px::IPlugin* plugin) override;
+	
+	px::con_command* FindCommand(std::string_view name) override;
 
-	void Execute(const std::string_view& cmds) override;
+	void Execute(std::string_view cmds) override;
 
 	void Clear(size_t size = 0, bool is_history = false) override;
 
@@ -44,6 +37,22 @@ public:
 			msg
 		);
 	}
+
+	void AddCommands()
+	{
+		AddCommands(nullptr, px::cmd_manager::begin(), px::cmd_manager::end());
+		px::cmd_manager::clear();
+	}
+
+protected:
+	/// <summary>
+	/// Add console commands to plugin's commands
+	/// </summary>
+	void AddCommands(
+		px::IPlugin* plugin,
+		px::con_command::entries_type::iterator begin,
+		px::con_command::entries_type::iterator end
+	) override;
 };
 
 PX_NAMESPACE_BEGIN();

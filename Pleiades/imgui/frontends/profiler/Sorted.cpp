@@ -3,8 +3,6 @@
 #include <set>
 #include "Profiler.hpp"
 
-PX_NAMESPACE_BEGIN();
-
 /*
 ---------------------------------------------------------------------------------
 Name        |   Foo::Bar                                                        |
@@ -51,29 +49,29 @@ void ImGuiProfilerInstance::SectionHandler::DisplaySorted()
     static int num_samples = 50;
     static SortMode sort_mode{ SortMode::ByMax };
 
-    ImGui::PushItemWidth(200.f);
-    if (ImGui::BeginCombo("Type", SortNames[static_cast<size_t>(sort_mode)], ImGuiComboFlags_PopupAlignLeft))
     {
-        for (int i = 0; i < std::ssize(SortNames); i++)
+        imcxx::shared_item_width width_override(200.f);
+        if (imcxx::combo_box types = { "Type", SortNames[static_cast<size_t>(sort_mode)], ImGuiComboFlags_PopupAlignLeft })
         {
-            const SortMode cur = static_cast<SortMode>(i);
-            const bool selected = sort_mode == cur;
+            for (int i = 0; i < std::ssize(SortNames); i++)
+            {
+                const SortMode cur = static_cast<SortMode>(i);
+                const bool selected = sort_mode == cur;
 
-            if (ImGui::Selectable(SortNames[i], selected))
-                sort_mode = cur;
+                if (ImGui::Selectable(SortNames[i], selected))
+                    sort_mode = cur;
 
-            if (selected)
-                ImGui::SetItemDefaultFocus();
+                if (selected)
+                    ImGui::SetItemDefaultFocus();
+            }
         }
-        ImGui::EndCombo();
-    }  ImGui::SameLine();
-
-    ImGui::Checkbox("With childrens", &with_childrens);  ImGui::SameLine();
-
-    ImGui::SliderInt("Samples", &num_samples, 0, 10'000);
-
-    ImGui::PopItemWidth();
-
+        ImGui::SameLine();
+        imcxx::checkbox::call("With childrens", with_childrens);
+        
+        ImGui::SameLine();
+        imcxx::slider::call("Samples", num_samples, 0, 10'000);
+    }
+    
     struct entry_set : std::reference_wrapper<container_type::value_type>
     {
         auto operator<=>(const entry_set& o) const noexcept
@@ -123,12 +121,12 @@ void ImGuiProfilerInstance::SectionHandler::DisplaySorted()
 
     for (auto& entry : entries)
     {
-        if (ImGui::TreeNodeEx(entry.get().name.c_str(), ImGuiTreeNodeFlags_SpanFullWidth))
+        if (imcxx::tree_node sorted_node{ entry.get().name.c_str(), ImGuiTreeNodeFlags_SpanFullWidth })
         {
-            if (ImGui::BeginTable("Sorted Table", 2, table_flags))
+            if (imcxx::table sorted_table{ "Sorted Table", 2, table_flags })
             {
                 using namespace std::chrono_literals;
-                using name_and_duration = std::pair<const char*, profiler::types::clock_duration>;
+                using name_and_duration = std::pair<const char*, px::profiler::types::clock_duration>;
 
                 for (auto& name_dur : {
                     name_and_duration{ "Min", entry.get().min },
@@ -137,59 +135,52 @@ void ImGuiProfilerInstance::SectionHandler::DisplaySorted()
                     name_and_duration{ "Avg (total)", entry.get().avg_total },
                 })
                 {
-                    if (ImGui::TableNextColumn())
+                    if (sorted_table.next_column())
                         ImGui::TextUnformatted(name_dur.first);
-                    if (ImGui::TableNextColumn())
+                    if (sorted_table.next_column())
                         ImGui::Text("%lldns (%lldus) (%lldms)", name_dur.second / 1ns, name_dur.second / 1us, name_dur.second / 1ms);
                 }
 
-                bool node_is_on = false;
-                if (ImGui::TableNextColumn())
-                    node_is_on = ImGui::TreeNodeEx("Calls", ImGuiTreeNodeFlags_SpanFullWidth);
-                ImGui::TableNextColumn();
-
-                if (node_is_on)
+                if (sorted_table.next_column())
                 {
-                    ImGuiListClipper clipper;
-                    auto& call_stamps = entry.get().entries;
-                    clipper.Begin(call_stamps.size());
+                    imcxx::tree_node calls_node{ "Calls", ImGuiTreeNodeFlags_SpanFullWidth };
 
-                    while (clipper.Step())
+                    if (sorted_table.next_column() && calls_node)
                     {
-                        auto iter = call_stamps.begin();
-                        std::advance(iter, clipper.DisplayStart);
+                        ImGuiListClipper clipper;
+                        auto& call_stamps = entry.get().entries;
+                        clipper.Begin(call_stamps.size());
 
-                        for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++)
+                        while (clipper.Step())
                         {
-                            if (ImGui::TableNextColumn())
-                                ImGui::Text("[%i]", i);
-                            if (ImGui::TableNextColumn())
-                            {
-                                auto duration = iter->duration;
-                                float pct_minmax = static_cast<float>(duration.count()) / entry.get().avg_minmax.count(),
-                                    pct_avg = static_cast<float>(duration.count()) / entry.get().avg_total.count();
+                            auto iter = call_stamps.begin();
+                            std::advance(iter, clipper.DisplayStart);
 
-                                ImGui::Bullet();
-                                ImGui::TextColored(
-                                    SectionHandler::GetColor(1.f - pct_minmax),
-                                    "%lldns (%lldus) (%lldms)  (Pct min/max: %.3f%%) (Pct avg: %.3f%%)",
-                                    duration / 1ns, duration / 1us, duration / 1ms,
-                                    100.f - pct_minmax * 100.f,
-                                    100.f - pct_avg * 100.f
-                                );
+                            for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++)
+                            {
+                                if (sorted_table.next_column())
+                                    ImGui::Text("[%i]", i);
+                                if (sorted_table.next_column())
+                                {
+                                    auto duration = iter->duration;
+                                    float pct_minmax = static_cast<float>(duration.count()) / entry.get().avg_minmax.count(),
+                                        pct_avg = static_cast<float>(duration.count()) / entry.get().avg_total.count();
+
+                                    ImGui::Bullet();
+                                    ImGui::TextColored(
+                                        SectionHandler::GetColor(1.f - pct_minmax),
+                                        "%lldns (%lldus) (%lldms)  (Pct min/max: %.3f%%) (Pct avg: %.3f%%)",
+                                        duration / 1ns, duration / 1us, duration / 1ms,
+                                        100.f - pct_minmax * 100.f,
+                                        100.f - pct_avg * 100.f
+                                    );
+                                }
+                                ++iter;
                             }
-                            ++iter;
                         }
                     }
-
-                    ImGui::TreePop();
                 }
-                ImGui::EndTable();
             }
-
-            ImGui::TreePop();
         }
     }
 }
-
-PX_NAMESPACE_END();

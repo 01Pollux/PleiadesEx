@@ -1,7 +1,7 @@
+
 #include <format>
 #include "Logger.hpp"
 
-PX_NAMESPACE_BEGIN();
 
 void ImGuiJsLog_HandleDrawPopups(nlohmann::json& info);
 
@@ -13,11 +13,8 @@ static std::string ImGuiJsViewPopup;
 
 void ImGuiJsLogInfo::DrawPopupState()
 {
-	if (ImGui::BeginPopupContextItem())
-	{
+	if (imcxx::popup state_popup{ imcxx::popup::context_item{} })
 		ImGuiJsLog_HandleDrawPopups(this->Logs);
-		ImGui::EndPopup();
-	}
 
 	if (!ImGuiJsViewPopup.empty())
 		ImGui::OpenPopup("Json viewer");
@@ -27,21 +24,18 @@ void ImGuiJsLogInfo::DrawPopupState()
 		ImVec2 center = ImGui::GetMainViewport()->GetCenter();
 		ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(.5f, .5f));
 
-		if (ImGui::BeginPopupModal("Json viewer", nullptr, ImGuiWindowFlags_NoSavedSettings))
+		if (imcxx::popup json_viewer_popup{ imcxx::popup::modal{}, "Json viewer", nullptr, ImGuiWindowFlags_NoSavedSettings })
 		{
-			if (ImGui::BeginChild("Json viwer##child", { 720.f, 360.f }, false, ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_HorizontalScrollbar))
+			if (imcxx::window_child json_viewer{ "Json viwer##child", { 720.f, 360.f }, false, ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_HorizontalScrollbar })
 				ImGui::InputTextMultiline("", ImGuiJsViewPopup.data(), ImGuiJsViewPopup.size(), { -FLT_MIN, -FLT_MIN }, ImGuiInputTextFlags_ReadOnly);
-			ImGui::EndChild();
 
 			ImGui::Separator();
 			if (ImGui::Button("Exit", { -FLT_MIN, 0.f }))
 			{
 				ImGuiJsViewPopup.clear();
 				ImGuiJsViewPopup.shrink_to_fit();
-				ImGui::CloseCurrentPopup();
+				json_viewer_popup.close();
 			}
-
-			ImGui::EndPopup();
 		}
 	}
 }
@@ -75,16 +69,15 @@ void ImGuiJsLogInfo::DrawLogs(const ImGuiTextFilter& filter)
 		// ImGuiCol_Header : { *, *, *, 0.5f }
 		// ImGuiCol_HeaderHovered : { *, *, *, 0.6f }
 		// ImGuiCol_HeaderActive : { *, *, *, 0.7f }
-		for (size_t i = 0; i < 4; i++)
-		{
-			clr.w += 0.1f;
-			ImGui::PushStyleColor(ImGuiCol_Header + i, clr);
-		}
+
+		imcxx::shared_color color_override(ImGuiCol_Header, clr);
+		clr.w += 0.1f; color_override.push(ImGuiCol_HeaderHovered, clr);
+		clr.w += 0.1f; color_override.push(ImGuiCol_HeaderActive, clr);
 
 		// First should sections
 		// 'Error', 'Message' etc...
-		bool header_on = ImGui::CollapsingHeader(iter.key().c_str());
-		ImGui::PopStyleColor(4);
+		imcxx::collapsing_header iter_header(iter.key().c_str());
+		color_override.pop(color_override.count());
 
 
 		// Second should be time stamp of the log
@@ -93,13 +86,13 @@ void ImGuiJsLogInfo::DrawLogs(const ImGuiTextFilter& filter)
 			if (!this->FilterInfo(filter, time_info, false))
 				continue;
 
-			if (header_on)
+			if (iter_header)
 			{
-				bool node_is_on = ImGui::TreeNodeEx(&*time_info, ImGuiTreeNodeFlags_SpanFullWidth, "{%s}", time_info.key().c_str());
+				imcxx::tree_node time_node(static_cast<const void*>(std::addressof(*time_info)), ImGuiTreeNodeFlags_SpanFullWidth, "{%s}", time_info.key().c_str());
 
 				bool skip_node = false;
-
-				if (ImGui::BeginPopupContextItem())
+				
+				if (imcxx::popup entry_popup{ imcxx::popup::context_item{} })
 				{
 					ImGuiJsLog_HandleDrawPopups(*time_info);
 
@@ -107,19 +100,12 @@ void ImGuiJsLogInfo::DrawLogs(const ImGuiTextFilter& filter)
 					{
 						time_info = iter->erase(time_info);
 						skip_node = true;
-						ImGui::CloseCurrentPopup();
+						entry_popup.close();
 					}
-
-					ImGui::EndPopup();
 				}
 
-				if (node_is_on)
-				{
-					if (!skip_node)
-						ImGuiJsLog_HandleDrawInfo(*time_info);
-
-					ImGui::TreePop();
-				}
+				if (time_node && !skip_node)
+					ImGuiJsLog_HandleDrawInfo(*time_info);
 			}
 		}
 	}
@@ -143,21 +129,15 @@ void ImGuiJsLog_HandleDrawInfo(const nlohmann::json& info)
 
 		case value_t::object:
 		{
-			if (ImGui::TreeNodeEx(&*iter, ImGuiTreeNodeFlags_SpanFullWidth, "{%s}", iter.key().c_str()))
-			{
+			if (imcxx::tree_node draw_tree{ static_cast<const void*>(std::addressof(*iter)), ImGuiTreeNodeFlags_SpanFullWidth, "[%s]", iter.key().c_str()})
 				ImGuiJsLog_HandleDrawInfo(*iter);
-				ImGui::TreePop();
-			}
 			break;
 		}
 
 		case value_t::array:
 		{
-			if (ImGui::TreeNodeEx(&*iter, ImGuiTreeNodeFlags_SpanFullWidth, "[%s]", iter.key().c_str()))
-			{
+			if (imcxx::tree_node draw_tree{ static_cast<const void*>(std::addressof(*iter)), ImGuiTreeNodeFlags_SpanFullWidth, "[%s]", iter.key().c_str() })
 				ImGuiJsLog_HandleDrawArray(*iter);
-				ImGui::TreePop();
-			}
 			break;
 		}
 
@@ -191,21 +171,15 @@ void ImGuiJsLog_HandleDrawArray(const nlohmann::json& info)
 
 		case value_t::object:
 		{
-			if (ImGui::TreeNodeEx(&val, ImGuiTreeNodeFlags_SpanFullWidth, key))
-			{
+			if (imcxx::tree_node draw_tree{ static_cast<const void*>(std::addressof(val)), ImGuiTreeNodeFlags_SpanFullWidth, key})
 				ImGuiJsLog_HandleDrawInfo(val);
-				ImGui::TreePop();
-			}
 			break;
 		}
 
 		case value_t::array:
 		{
-			if (ImGui::TreeNodeEx(&val, ImGuiTreeNodeFlags_SpanFullWidth, key))
-			{
+			if (imcxx::tree_node draw_tree{ static_cast<const void*>(std::addressof(val)), ImGuiTreeNodeFlags_SpanFullWidth, key })
 				ImGuiJsLog_HandleDrawArray(val);
-				ImGui::TreePop();
-			}
 			break;
 		}
 
@@ -223,7 +197,7 @@ void ImGuiJsLog_HandleDrawData(const char* key, const nlohmann::json& value)
 {
 	using value_t = nlohmann::json::value_t;
 
-	if (ImGui::TreeNodeEx(&value, ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanFullWidth, "%s: ", key))
+	if (imcxx::tree_node draw_tree{ static_cast<const void*>(&value), ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanFullWidth, "%s: ", key})
 	{
 		ImGui::SameLine(0.f, 10.f);
 		switch (value.type())
@@ -258,9 +232,7 @@ void ImGuiJsLog_HandleDrawData(const char* key, const nlohmann::json& value)
 			std::string txt("{ ");
 
 			for (size_t i = 0; i < size; i++)
-			{
 				std::format_to(std::back_inserter(txt), "0x{:#X}", bins[i]);
-			}
 
 			if (size)
 				std::format_to(std::back_inserter(txt), "0x{:#X} }}", bins[size - 1]);
@@ -273,7 +245,6 @@ void ImGuiJsLog_HandleDrawData(const char* key, const nlohmann::json& value)
 		}
 	}
 }
-
 
 
 void ImGuiJsLog_HandleDrawPopups(nlohmann::json& info)
@@ -301,7 +272,3 @@ void ImGuiJsLog_HandleDrawPopups(nlohmann::json& info)
 		ImGui::CloseCurrentPopup();
 	}
 }
-
-
-
-PX_NAMESPACE_END();
